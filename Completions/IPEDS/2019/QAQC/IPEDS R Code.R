@@ -2,18 +2,11 @@
 
 # file comparison code between a CSV source file and raw upload SQL Table
 
-#Reading in packages
-pkgTest <- function(pkg){
-  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg))
-    install.packages(new.pkg, dep = TRUE)
-  sapply(pkg, require, character.only = TRUE)
-  
-  
-}
-packages <- c("data.table", "ggplot2", "scales", "sqldf", "rstudioapi", "RODBC", "reshape2", 
-              "stringr","tidyverse", "plyr", "readxl", "readr", "reshape", "taRifx", "tibble")
-pkgTest(packages)
+#set working directory and access code to read in SQL queries
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
+source("..\\..\\..\\..\\Common_functions\\readSQL.R")
+getwd()
 
 #Read in source files
 source_2010 <- read.csv("R:\\DPOE\\IPEDS\\2019\\Source\\c2010_a_rv.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
@@ -407,7 +400,6 @@ db_2017$"XCWHITM"<-gsub('"', "", db_2017$"XCWHITM")
 db_2017$"XCWHITT"<-gsub('"', "", db_2017$"XCWHITT")
 db_2017$"XCWHITW"<-gsub('"', "", db_2017$"XCWHITW")
 
-
 #Order source data table
 source_2010 <- source_2010[order(source_2010$"UNITID",source_2010$"CIPCODE",source_2010$"MAJORNUM",source_2010$"AWLEVEL",source_2010$"XCNRALM",source_2010$"CNRALM",source_2010$"XCNRALW",source_2010$"CNRALW",source_2010$"XCRACE03",source_2010$"CRACE03",source_2010$"XCRACE04",source_2010$"CRACE04",source_2010$"XCRACE05",source_2010$"CRACE05",source_2010$"XCRACE06",source_2010$"CRACE06",source_2010$"XCRACE07",source_2010$"CRACE07",source_2010$"XCRACE08",source_2010$"CRACE08",source_2010$"XCRACE09",source_2010$"CRACE09",source_2010$"XCRACE10",source_2010$"CRACE10",source_2010$"XCRACE11",source_2010$"CRACE11",source_2010$"XCRACE12",source_2010$"CRACE12",source_2010$"XCUNKNM",source_2010$"CUNKNM",source_2010$"XCUNKNW",source_2010$"CUNKNW",source_2010$"XCTOTALM",source_2010$"CTOTALM",source_2010$"XCTOTALW",source_2010$"CTOTALW",source_2010$"XCNRALT",source_2010$"CNRALT",source_2010$"XCRACE18",source_2010$"CRACE18",source_2010$"XCRACE19",source_2010$"CRACE19",source_2010$"XCRACE20",source_2010$"CRACE20",source_2010$"XCRACE21",source_2010$"CRACE21",source_2010$"XCRACE22",source_2010$"CRACE22",source_2010$"XCUNKNT",source_2010$"CUNKNT",source_2010$"XCTOTALT",source_2010$"CTOTALT",source_2010$"XCHISPM",source_2010$"CHISPM",source_2010$"XCHISPW",source_2010$"CHISPW",source_2010$"XCAIANM",source_2010$"CAIANM",source_2010$"XCAIANW",source_2010$"CAIANW",source_2010$"XCASIAM",source_2010$"CASIAM",source_2010$"XCASIAW",source_2010$"CASIAW",source_2010$"XCBKAAM",source_2010$"CBKAAM",source_2010$"XCBKAAW",source_2010$"CBKAAW",source_2010$"XCNHPIM",source_2010$"CNHPIM",source_2010$"XCNHPIW",source_2010$"CNHPIW",source_2010$"XCWHITM",source_2010$"CWHITM",source_2010$"XCWHITW",source_2010$"CWHITW",source_2010$"XC2MORM",source_2010$"C2MORM",source_2010$"XC2MORW",source_2010$"C2MORW",source_2010$"XCHISPT",source_2010$"CHISPT",source_2010$"XCAIANT",source_2010$"CAIANT",source_2010$"XCASIAT",source_2010$"CASIAT",source_2010$"XCBKAAT",source_2010$"CBKAAT",source_2010$"XCNHPIT",source_2010$"CNHPIT",source_2010$"XCWHITT",source_2010$"CWHITT",source_2010$"XC2MORT",source_2010$"C2MORT",source_2010$"XDVCAIT",source_2010$"DVCAIT",source_2010$"XDVCAIM",source_2010$"DVCAIM",source_2010$"XDVCAIW",source_2010$"DVCAIW",source_2010$"XDVCAPT",source_2010$"DVCAPT",source_2010$"XDVCAPM",source_2010$"DVCAPM",source_2010$"XDVCAPW",source_2010$"DVCAPW",source_2010$"XDVCBKT",source_2010$"DVCBKT",source_2010$"XDVCBKM",source_2010$"DVCBKM",source_2010$"XDVCBKW",source_2010$"DVCBKW",source_2010$"XDVCHST",source_2010$"DVCHST",source_2010$"XDVCHSM",source_2010$"DVCHSM",source_2010$"XDVCHSW",source_2010$"DVCHSW",source_2010$"XDVCWHT",source_2010$"DVCWHT",source_2010$"XDVCWHM",source_2010$"DVCWHM",source_2010$"XDVCWHW",source_2010$"DVCWHW"),]
 source_2011 <- source_2011[order(source_2011$"UNITID",source_2011$"CIPCODE",source_2011$"MAJORNUM",source_2011$"AWLEVEL",source_2011$"XCTOTALT",source_2011$"CTOTALT",source_2011$"XCTOTALM",source_2011$"CTOTALM",source_2011$"XCTOTALW",source_2011$"CTOTALW",source_2011$"XCAIANT",source_2011$"CAIANT",source_2011$"XCAIANM",source_2011$"CAIANM",source_2011$"XCAIANW",source_2011$"CAIANW",source_2011$"XCASIAT",source_2011$"CASIAT",source_2011$"XCASIAM",source_2011$"CASIAM",source_2011$"XCASIAW",source_2011$"CASIAW",source_2011$"XCBKAAT",source_2011$"CBKAAT",source_2011$"XCBKAAM",source_2011$"CBKAAM",source_2011$"XCBKAAW",source_2011$"CBKAAW",source_2011$"XCHISPT",source_2011$"CHISPT",source_2011$"XCHISPM",source_2011$"CHISPM",source_2011$"XCHISPW",source_2011$"CHISPW",source_2011$"XCNHPIT",source_2011$"CNHPIT",source_2011$"XCNHPIM",source_2011$"CNHPIM",source_2011$"XCNHPIW",source_2011$"CNHPIW",source_2011$"XCWHITT",source_2011$"CWHITT",source_2011$"XCWHITM",source_2011$"CWHITM",source_2011$"XCWHITW",source_2011$"CWHITW",source_2011$"XC2MORT",source_2011$"C2MORT",source_2011$"XC2MORM",source_2011$"C2MORM",source_2011$"XC2MORW",source_2011$"C2MORW",source_2011$"XCUNKNT",source_2011$"CUNKNT",source_2011$"XCUNKNM",source_2011$"CUNKNM",source_2011$"XCUNKNW",source_2011$"CUNKNW",source_2011$"XCNRALT",source_2011$"CNRALT",source_2011$"XCNRALM",source_2011$"CNRALM",source_2011$"XCNRALW",source_2011$"CNRALW"),]
@@ -445,16 +437,6 @@ rownames(source_2016) <- NULL
 rownames(db_2016) <- NULL
 rownames(source_2017) <- NULL
 rownames(db_2017) <- NULL
-
-#Verify that this worked
-# all(rownames(source_2010) == rownames(db_2010))
-# all(rownames(source_2011) == rownames(db_2011))
-# all(rownames(source_2012) == rownames(db_2012))
-# all(rownames(source_2013) == rownames(db_2013))
-# all(rownames(source_2014) == rownames(db_2014))
-# all(rownames(source_2015) == rownames(db_2015))
-# all(rownames(source_2016) == rownames(db_2016))
-# all(rownames(source_2017) == rownames(db_2017))
 
 #compare files 
 #2010
@@ -524,38 +506,11 @@ source_2016 <- source_2016[-c(6,8:65)]
 source_2017 <- source_2017[-c(6,8:65)]
 
 #Merge into one file
-source <- rbind(source_2010,source_2011)
-source <- rbind(source,source_2012)
-source <- rbind(source,source_2013)
-source <- rbind(source,source_2014)
-source <- rbind(source,source_2015)
-source <- rbind(source,source_2016)
-source <- rbind(source,source_2017)
+source <- do.call("rbind", list(source_2010, source_2011, source_2012, source_2013, source_2014, source_2015, source_2016, source_2017))
 
-#Remove old source files
-rm(source_2010)
-rm(source_2011)
-rm(source_2012)
-rm(source_2013)
-rm(source_2014)
-rm(source_2015)
-rm(source_2016)
-rm(source_2017)
-
-#Remove old db files
-rm(db_2010)
-rm(db_2011)
-rm(db_2012)
-rm(db_2013)
-rm(db_2014)
-rm(db_2015)
-rm(db_2016)
-rm(db_2017)
-
-#set working directory and access code to read in SQL queries
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-source("../QAQC/readSQL.R")
-getwd()
+#Remove old source/db files
+rm(source_2010, source_2011, source_2012, source_2013, source_2014, source_2015, source_2016, source_2017)
+rm(db_2010, db_2011, db_2012, db_2013, db_2014, db_2015, db_2016, db_2017)
 
 #turn off strings reading in as factors
 options(stringsAsFactors=FALSE)
@@ -573,22 +528,16 @@ odbcClose(channel)
 #Add in vintage_yr column
 source_data <- add_column(source, vintage_yr=2019, .after="CTOTALT")
 
-#Verify that this worked
-all(colnames(source_data) == colnames(database_data))
-
 #Check data types
 # str(source_data)
 # str(database_data)
-# all(str(database_data) == str(source_data))
 
 #Convert data types
 source_data$yr <- as.integer(source_data$yr)
 source_data$vintage_yr <- as.integer(source_data$vintage_yr)
 
-#Order table database_data
+#Order table database_data and source_data
 database_data <- database_data[order(database_data$yr,database_data$UNITID,database_data$CIPCODE,database_data$MAJORNUM,database_data$AWLEVEL,database_data$CTOTALT,database_data$vintage_yr),]
-
-#Order table source_data
 source_data <- source_data[order(source_data$yr,source_data$UNITID,source_data$CIPCODE,source_data$MAJORNUM,source_data$AWLEVEL,source_data$CTOTALT,source_data$vintage_yr),]  
 
 #Delete unique key assigned by R so that identical function will work
