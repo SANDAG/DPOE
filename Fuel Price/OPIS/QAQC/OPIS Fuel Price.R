@@ -22,6 +22,7 @@ database_data1 <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
 sql_query2 <- 'SELECT * FROM [dpoe_stage].[dbo].[opis_fuel_price_0118_0519]'
 database_data2 <- sqlQuery(channel,sql_query2,stringsAsFactors = FALSE)
 
+odbcClose(channel)
 #Read in excel data
 #Dataset #1 - January 2005 to December 2013 OPIS Fuel Price Data
 source_data <- read_excel("R:\\DPOE\\Fuel Price\\OPIS\\2019\\Source\\OPIS_FUEL_010105to123113.xlsx")
@@ -112,6 +113,10 @@ which(source_data2!=database_data2, arr.ind = TRUE)
 #File comparison between source file to fact table
 
 #Read in sql queries
+
+#turn off strings reading in as factors
+options(stringsAsFactors=FALSE)
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
 
 #2005-2013
 sql_query4 = getSQL("../QAQC/Fact Table 2005-2013_1.sql")
