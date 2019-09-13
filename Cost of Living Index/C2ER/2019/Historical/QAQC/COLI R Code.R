@@ -1,20 +1,12 @@
 #COLI Data
 
+#set working directory and access code to read in SQL queries
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+source("..\\..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
+source("..\\..\\..\\..\\..\\Common_functions\\readSQL.R")
+getwd()
+
 # file comparison code between a CSV source file and raw upload SQL Table
-
-#Reading in packages
-pkgTest <- function(pkg){
-  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg))
-    install.packages(new.pkg, dep = TRUE)
-  sapply(pkg, require, character.only = TRUE)
-  
-  
-}
-packages <- c("data.table", "ggplot2", "scales", "sqldf", "rstudioapi", "RODBC", "reshape2", 
-              "stringr","tidyverse", "plyr", "readxl", "readr", "reshape")
-pkgTest(packages)
-
 
 #Read in source and database files
 source_data <- read_excel("R:\\DPOE\\C2ER Cost of Living Index\\2019\\Historical\\Source\\COLI Historical Data - 1990 Q1 - 2019 Q1.xlsx",guess_max = 40000)
@@ -114,12 +106,6 @@ which(source_data!=database_data,arr.ind=TRUE)
 #####################################################################################################################################################################
 
 #Compare source data to fact table
-
-#set working directory and access code to read in SQL queries
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-source("../QAQC/readSQL.R")
-
-getwd()
 
 #turn off strings reading in as factors
 options(stringsAsFactors=FALSE)
