@@ -6,6 +6,7 @@ source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
 source("..\\..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
+
 # File Comparison between source data and database data
 
 #Read in text files
