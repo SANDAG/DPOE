@@ -95,7 +95,7 @@ odbcClose(channel)
 source <- do.call("rbind", list(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10))
 
 #Remove other source files
-rm(source1,source2,source3,source4,source5,source6,source7,source8,source9,source10)
+#rm(source1,source2,source3,source4,source5,source6,source7,source8,source9,source10)
 
 #View column names in source data
 colnames(source)
@@ -113,6 +113,7 @@ unique(source$timestamp)
 
 #Convert data types
 source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y"), "%Y-%m-%d")
+db$timestamp <- format(as.Date(db$timestamp, format = "%Y-%m-%d"), "%Y-%m-%d")
 
 #Order data frames for comparison
 source <- source[order(source$timestamp,source$station,source$district,source$route,source$direction,source$type,source$seg_length,source$samples,source$observed,source$total_flow,source$avg_occ,source$avg_speed,source$delay35,source$delay40,source$delay45,source$delay50,source$delay55,source$delay60,source$l1_flow,source$l1_occ,source$l1_speed,source$l2_flow,source$l2_occ,source$l2_speed,source$l3_flow,source$l3_occ,source$l3_speed,source$l4_flow,source$l4_occ,source$l4_speed,source$l5_flow,source$l5_occ,source$l5_speed,source$l6_flow,source$l6_occ,source$l6_speed,source$l7_flow,source$l7_occ,source$l7_speed,source$l8_flow,source$l8_occ,source$l8_speed),]
@@ -124,5 +125,6 @@ rownames(db) <- NULL
 
 # compare source and to database files to ensure they match
 all(source == db)
+all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
