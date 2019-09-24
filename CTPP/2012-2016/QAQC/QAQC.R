@@ -117,6 +117,13 @@ rownames(db2) <- NULL
 rownames(source3) <- NULL
 rownames(db3) <- NULL
 
+# Delete white space
+trimws(db1$"content")
+trimws(db1$"universe_desc")
+trimws(db2$"content")
+trimws(db2$"universe_desc")
+trimws(db3$"content")
+
 #Compare files 
 all(source1 == db1) #check cell values only
 all.equal(source1,db1) #check cell values and data types and will return the conflicted cells
