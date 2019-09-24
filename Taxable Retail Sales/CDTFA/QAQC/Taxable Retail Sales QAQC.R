@@ -62,7 +62,7 @@ which(source!=db, arr.ind = TRUE)
 colnames(source)
 colnames(db2)
 
-#Drop columns from source_data
+#Drop columns from source
 source2 <- select(source, -c("month_from", "month_to", "disclosure"))
 
 #Check data types
