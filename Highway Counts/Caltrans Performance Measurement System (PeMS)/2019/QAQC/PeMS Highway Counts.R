@@ -1,5 +1,8 @@
 #PeMS Highway Counts 11/2018-08/2019 Station Day
 
+# display more digits
+options(digits=15)
+
 #set working directory and access code to read in SQL queries
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
@@ -67,6 +70,10 @@ all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
 
+# example of differences between 2 dataframes
+# because of "real" datatype in sql server?
+db[87,7]
+source[87,7]
 ######################################################################################################################################################
 
 #PeMS Highway Counts 11/2018-08/2019 Station Hour
