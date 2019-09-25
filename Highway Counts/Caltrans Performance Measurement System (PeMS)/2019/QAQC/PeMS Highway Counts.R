@@ -42,9 +42,6 @@ odbcClose(channel)
 colnames(source)
 colnames(db)
 
-#Drop columns from source
-source <- select(source, -17:-42)
-
 #Rename source data. Make sure order is the same as in the database.
 source <- plyr::rename(source, c("V1"="timestamp", "V2"="station", "V3"="district", "V4"="route", "V5"="direction", "V6"="type", "V7"="seg_length", "V8"="samples", "V9"="observed", "V10"="total_flow", "V11"="delay35", "V12"="delay40", "V13"="delay45", "V14"="delay50", "V15"="delay55", "V16"="delay60"))
 
