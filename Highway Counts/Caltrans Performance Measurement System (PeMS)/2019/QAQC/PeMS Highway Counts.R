@@ -56,6 +56,15 @@ str(db)
 source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y"), "%Y-%m-%d")
 db$timestamp <- format(as.Date(db$timestamp, format = "%Y-%m-%d"), "%Y-%m-%d")
 
+#Round seg_length
+db$seg_length <- round(db$seg_length,digits=3)
+db$delay35 <- round(db$delay35,digits=3)
+db$delay40 <- round(db$delay40,digits=3)
+db$delay45 <- round(db$delay45,digits=3)
+db$delay50 <- round(db$delay50,digits=3)
+db$delay55 <- round(db$delay55,digits=3)
+db$delay60 <- round(db$delay60,digits=3)
+
 #Order data frames for comparison
 source <- source[order(source$timestamp, source$station, source$district, source$route, source$direction, source$type, source$seg_length, source$samples, source$observed, source$total_flow, source$delay35, source$delay40, source$delay45, source$delay50, source$delay55, source$delay60),]
 db <- db[order(db$timestamp, db$station, db$district, db$route, db$direction, db$type, db$seg_length, db$samples, db$observed, db$total_flow, db$delay35, db$delay40, db$delay45, db$delay50, db$delay55, db$delay60),]
@@ -72,11 +81,17 @@ which(source!=db, arr.ind=TRUE)
 
 # example of differences between 2 dataframes
 # because of "real" datatype in sql server?
-db[87,7]
-source[87,7]
+db[2054,11]
+source[2054,11]
+
+unique(source$delay45)
+unique(source$seg_length)
 ######################################################################################################################################################
 
 #PeMS Highway Counts 11/2018-08/2019 Station Hour
+
+# display more digits
+options(digits=15)
 
 # File Comparison between source data and database data
 
