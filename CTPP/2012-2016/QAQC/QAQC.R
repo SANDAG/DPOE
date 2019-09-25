@@ -77,7 +77,6 @@ str(db2)
 str(source3)
 str(db3)
 
-### WORK ON THIS
 #Convert to data frame
 source1 <- as.data.frame(source1)
 source2 <- as.data.frame(source2)
@@ -86,8 +85,6 @@ db1 <- as.data.frame(db1)
 db2 <- as.data.frame(db2)
 db3 <- as.data.frame(db3)
 
-
-### WORK ON THIS 
 #Convert data types
 source1$universe_num1 <- as.integer(source1$universe_num1)
 source2$universe_num1 <- as.integer(source2$universe_num1)
