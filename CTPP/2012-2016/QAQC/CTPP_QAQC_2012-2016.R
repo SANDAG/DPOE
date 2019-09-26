@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+### initialize the work environment ###
+=======
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 #set up workspace
 maindir = dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(maindir)
@@ -11,13 +15,21 @@ source("common_functions.R")
 packages <- c("RODBC","tidyverse","openxlsx","hash","plyr", "data.table")
 pkgTest(packages)
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 #initialize start time
 sleep_for_a_minute <- function() { Sys.sleep(60) }
 start_time <- Sys.time()
 end_time <- Sys.time()
 
 
+<<<<<<< HEAD
+
+### loading data ###
+=======
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 #import database_data (2012-2016)
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
 sql_query <- getSQL("G:/CTPP/QAQC/Query/CTPP ETL 2012-2016 for R.sql")
@@ -25,7 +37,10 @@ database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 gc() #release memory
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 #import source_data (2012-2016)
 setwd("R:/DPOE/CTPP/2012-2016/Source/Data")
 file_names <- dir(path = ".", pattern = ".csv") #where you have your files
@@ -33,7 +48,11 @@ source_data <- do.call(rbind,lapply(file_names,fread))
 source_data <- as.data.frame(source_data)
 gc() #release memory
 
+<<<<<<< HEAD
+### data cleaning ###
+=======
 
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 #remove columns from dataframes
 database_data$ctpp_id <- NULL
 source_data$SOURCE <- NULL
@@ -46,6 +65,32 @@ gc() #release memory
 #clean up est and num
 source_data$moe <- gsub("[ ,/,',',*,+,-]","", source_data$moe)
 source_data$est <- gsub("[ ,/,',',*,+,-]","", source_data$est)
+<<<<<<< HEAD
+# database_data$moe <- gsub("[NA]","", database_data$moe)
+# gc() #release memory
+
+#convert est in source_data to num
+source_data[,4:5] <- sapply(source_data[,4:5],as.numeric) #4:est, 5:moe
+# gc() #release memory
+
+#sort soruce_data and database_data
+database_data <- database_data[
+  with(database_data, order(geo_id, tbl_id, line_num, est, moe)),
+  ]
+source_data <- source_data[
+  with(source_data, order(geo_id, tbl_id, line_num, est, moe)),
+  ]
+# gc() #release memory
+
+#remove rownames (This works, but looking for other solutions to fix inconconsistency of rownames typNULLes)
+rownames(source_data) <- NULL
+rownames(database_data) <-NULL
+# gc() #release memory
+
+
+
+### Check Data Types and Values ###
+=======
 database_data$moe <- gsub("[NA]","", database_data$moe)
 gc() #release memory
 
@@ -86,6 +131,7 @@ gc() #release memory
 -----------------------------------------------------------------------
   
   ####Check Data Types and Values####
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 #Check data types
 str(source_data)
 str(database_data)
@@ -111,6 +157,16 @@ end_time - start_time
 # subset2 <- subset2[a,]
 # gc()
 
+<<<<<<< HEAD
+# #test code
+# c <-  "******ce,7382+/-  "
+# c <- "NA666"
+# c <- ""
+# gsub("","999", c)
+# gsub("[NA, ,/,',',*,+,-]","", c)
+
+=======
+>>>>>>> 43b9a076bee6a6fd6398074a60203a586471f66b
 # # count number of rows through a series of csv files
 # setwd("G:/New folder/SourceFiles/All")
 # filelist = list.files()
