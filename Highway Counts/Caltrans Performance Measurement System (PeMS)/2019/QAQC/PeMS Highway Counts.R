@@ -9,7 +9,7 @@ source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
 source("..\\..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
-# File Comparison between source data and database data
+# File Comparison between source data and database data #
 
 #Read in text files
 source1 <- read.delim("R:\\DPOE\\Highway Counts\\Caltrans Performance Measurement System (PeMS)\\2019\\Station day\\Source\\d11_text_station_day_2018_11.txt", header=FALSE, sep=",")
