@@ -9,7 +9,6 @@ source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
 source("..\\..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
-
 # File Comparison between source data and database data
 
 #Read in text files
@@ -39,28 +38,19 @@ db <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 
 #View column names in source data
-colnames(source)
-colnames(db)
+#colnames(source)
+#colnames(db)
 
 #Rename source data. Make sure order is the same as in the database.
 source <- plyr::rename(source, c("V1"="timestamp", "V2"="station", "V3"="district", "V4"="route", "V5"="direction", "V6"="type", "V7"="seg_length", "V8"="samples", "V9"="observed", "V10"="total_flow", "V11"="delay35", "V12"="delay40", "V13"="delay45", "V14"="delay50", "V15"="delay55", "V16"="delay60"))
 
 #Check data types
-str(source)
-str(db)
+#str(source)
+#str(db)
 
 #Convert data types
 source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y"), "%Y-%m-%d")
 db$timestamp <- format(as.Date(db$timestamp, format = "%Y-%m-%d"), "%Y-%m-%d")
-
-#Round seg_length
-db$seg_length <- round(db$seg_length,digits=3)
-db$delay35 <- round(db$delay35,digits=3)
-db$delay40 <- round(db$delay40,digits=3)
-db$delay45 <- round(db$delay45,digits=3)
-db$delay50 <- round(db$delay50,digits=3)
-db$delay55 <- round(db$delay55,digits=3)
-db$delay60 <- round(db$delay60,digits=3)
 
 #Order data frames for comparison
 source <- source[order(source$timestamp, source$station, source$district, source$route, source$direction, source$type, source$seg_length, source$samples, source$observed, source$total_flow, source$delay35, source$delay40, source$delay45, source$delay50, source$delay55, source$delay60),]
@@ -77,12 +67,9 @@ identical(source,db)
 which(source!=db, arr.ind=TRUE)
 
 # example of differences between 2 dataframes
-# because of "real" datatype in sql server?
-db[2054,11]
-source[2054,11]
+# db[87,7]
+# source[87,7]
 
-unique(source$delay45)
-unique(source$seg_length)
 ######################################################################################################################################################
 
 #PeMS Highway Counts 11/2018-08/2019 Station Hour
@@ -104,6 +91,12 @@ source8 <- read.delim("R:\\DPOE\\Highway Counts\\Caltrans Performance Measuremen
 source9 <- read.delim("R:\\DPOE\\Highway Counts\\Caltrans Performance Measurement System (PeMS)\\2019\\Station hour\\Source\\d11_text_station_hour_2019_07.txt", header=FALSE, sep=",")
 source10 <- read.delim("R:\\DPOE\\Highway Counts\\Caltrans Performance Measurement System (PeMS)\\2019\\Station hour\\Source\\d11_text_station_hour_2019_08.txt", header=FALSE, sep=",")
 
+#Merge source files into one file
+source <- do.call("rbind", list(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10))
+
+#Remove other source files
+rm(source1,source2,source3,source4,source5,source6,source7,source8,source9,source10)
+
 #Load database data
 options(stringsAsFactors=FALSE)
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
@@ -111,15 +104,9 @@ sql_query <- 'SELECT * FROM dpoe_stage.staging.pems_hour'
 db <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 
-#Merge source files into one file
-source <- do.call("rbind", list(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10))
-
-#Remove other source files
-#rm(source1,source2,source3,source4,source5,source6,source7,source8,source9,source10)
-
 #View column names in source data
-colnames(source)
-colnames(db)
+#colnames(source)
+#colnames(db)
 
 #Rename source data. Make sure order is the same as in the database.
 source <- plyr::rename(source, c("V1"="timestamp","V2"="station","V3"="district","V4"="route","V5"="direction","V6"="type","V7"="seg_length","V8"="samples","V9"="observed","V10"="total_flow","V11"="avg_occ","V12"="avg_speed","V13"="delay35","V14"="delay40","V15"="delay45","V16"="delay50","V17"="delay55","V18"="delay60","V19"="l1_flow","V20"="l1_occ","V21"="l1_speed","V22"="l2_flow","V23"="l2_occ","V24"="l2_speed","V25"="l3_flow","V26"="l3_occ","V27"="l3_speed","V28"="l4_flow","V29"="l4_occ","V30"="l4_speed","V31"="l5_flow","V32"="l5_occ","V33"="l5_speed","V34"="l6_flow","V35"="l6_occ","V36"="l6_speed","V37"="l7_flow","V38"="l7_occ","V39"="l7_speed","V40"="l8_flow","V41"="l8_occ","V42"="l8_speed"))
@@ -129,7 +116,7 @@ str(source)
 str(db)
 
 #Check distinct values
-unique(source$timestamp)
+#unique(source$timestamp)
 
 #Convert data types
 source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y"), "%Y-%m-%d")
@@ -148,3 +135,6 @@ all(source == db)
 all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
+
+db[25535,1]
+source[25535,1]
