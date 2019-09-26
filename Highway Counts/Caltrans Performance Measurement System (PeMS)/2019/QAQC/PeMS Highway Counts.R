@@ -128,12 +128,12 @@ source$type <- as.character(source$type)
 source <- source[order(source$timestamp,source$station,source$district,source$route,source$direction,source$type,source$seg_length,source$samples,source$observed,source$total_flow,source$avg_occ,source$avg_speed,source$delay35,source$delay40,source$delay45,source$delay50,source$delay55,source$delay60,source$l1_flow,source$l1_occ,source$l1_speed,source$l2_flow,source$l2_occ,source$l2_speed,source$l3_flow,source$l3_occ,source$l3_speed,source$l4_flow,source$l4_occ,source$l4_speed,source$l5_flow,source$l5_occ,source$l5_speed,source$l6_flow,source$l6_occ,source$l6_speed,source$l7_flow,source$l7_occ,source$l7_speed,source$l8_flow,source$l8_occ,source$l8_speed),]
 db <- db[order(db$timestamp,db$station,db$district,db$route,db$direction,db$type,db$seg_length,db$samples,db$observed,db$total_flow,db$avg_occ,db$avg_speed,db$delay35,db$delay40,db$delay45,db$delay50,db$delay55,db$delay60,db$l1_flow,db$l1_occ,db$l1_speed,db$l2_flow,db$l2_occ,db$l2_speed,db$l3_flow,db$l3_occ,db$l3_speed,db$l4_flow,db$l4_occ,db$l4_speed,db$l5_flow,db$l5_occ,db$l5_speed,db$l6_flow,db$l6_occ,db$l6_speed,db$l7_flow,db$l7_occ,db$l7_speed,db$l8_flow,db$l8_occ,db$l8_speed),]
 
-source <- source[
-  with(source, order(timestamp,station,district,route,direction,type,seg_length,samples,observed,total_flow,avg_occ,avg_speed,delay35,delay40,delay45,delay50,delay55,delay60,l1_flow,l1_occ,l1_speed,l2_flow,l2_occ,l2_speed,l3_flow,l3_occ,l3_speed,l4_flow,l4_occ,l4_speed,l5_flow,l5_occ,l5_speed,l6_flow,l6_occ,l6_speed,l7_flow,l7_occ,l7_speed,l8_flow,l8_occ,l8_speed)),
-  ]
-db <- db[
-  with(db, order(timestamp,station,district,route,direction,type,seg_length,samples,observed,total_flow,avg_occ,avg_speed,delay35,delay40,delay45,delay50,delay55,delay60,l1_flow,l1_occ,l1_speed,l2_flow,l2_occ,l2_speed,l3_flow,l3_occ,l3_speed,l4_flow,l4_occ,l4_speed,l5_flow,l5_occ,l5_speed,l6_flow,l6_occ,l6_speed,l7_flow,l7_occ,l7_speed,l8_flow,l8_occ,l8_speed)),
-  ]
+# source <- source[
+#   with(source, order(timestamp,station,district,route,direction,type,seg_length,samples,observed,total_flow,avg_occ,avg_speed,delay35,delay40,delay45,delay50,delay55,delay60,l1_flow,l1_occ,l1_speed,l2_flow,l2_occ,l2_speed,l3_flow,l3_occ,l3_speed,l4_flow,l4_occ,l4_speed,l5_flow,l5_occ,l5_speed,l6_flow,l6_occ,l6_speed,l7_flow,l7_occ,l7_speed,l8_flow,l8_occ,l8_speed)),
+#   ]
+# db <- db[
+#   with(db, order(timestamp,station,district,route,direction,type,seg_length,samples,observed,total_flow,avg_occ,avg_speed,delay35,delay40,delay45,delay50,delay55,delay60,l1_flow,l1_occ,l1_speed,l2_flow,l2_occ,l2_speed,l3_flow,l3_occ,l3_speed,l4_flow,l4_occ,l4_speed,l5_flow,l5_occ,l5_speed,l6_flow,l6_occ,l6_speed,l7_flow,l7_occ,l7_speed,l8_flow,l8_occ,l8_speed)),
+#   ]
 
 #delete rownames for checking files match
 rownames(source) <- NULL
