@@ -139,6 +139,11 @@ db <- db[order(db$timestamp,db$station,db$district,db$route,db$direction,db$type
 rownames(source) <- NULL
 rownames(db) <- NULL
 
+# issue with timestamps
+d1727 <- subset(db,total_flow==1727 & station ==1126974)
+s1727 <- subset(source,total_flow==1727 & station ==1126974)
+all.equal(s1727,d1727)
+
 # compare source and to database files to ensure they match
 all(source == db)
 all.equal(source,db)
