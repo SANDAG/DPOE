@@ -45,3 +45,41 @@ identical(source1,db1) #check cell values and data types
 which(source1!=db1, arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
 ####################################################################################################################################
+
+#file comparison code between source file and final SQL Table
+
+#Load database data
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
+sql_query1 <- 'SELECT * FROM dpoe_stage.dim.ctpp_line where yr = 2016'
+final <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
+odbcClose(channel)
+
+#Delete unneccessary columns
+final<- final[,-c(1:3)]
+
+#Rename source data
+source1 <- plyr::rename(source1, c("Table ID"="subj_table_id","Line Number"="line_number","Stub"="line_desc"))
+
+#Check data types
+str(source1)
+str(final)
+
+#Convert data types
+source1$line_number <- as.integer(source1$line_number)
+
+#Order table
+source1 <- source1[order(source1$subj_table_id,source1$line_number,source1$line_desc),]
+final <- final[order(final$subj_table_id,final$line_number,final$line_desc),]
+
+#delete rownames for checking files match (R assigns arbitrary IDs)
+rownames(source1) <- NULL
+rownames(final) <- NULL
+
+#Compare files 
+all(source1 == final) #check cell values only
+all.equal(source1,final) #check cell values and data types and will return the conflicted cells
+identical(source1,final) #check cell values and data types
+which(source1!=final, arr.ind = TRUE) #which command shows exactly which columns are incorrect
+
+source1[1,1]
+final[1,1]
