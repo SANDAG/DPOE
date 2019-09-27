@@ -4,8 +4,8 @@
 
 #set working directory and access code to read in SQL queries
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-source("C:/Users/ban/Documents/DPOE/Common_functions/Loading_in_packages.R")
-source("C:/Users/ban/Documents/DPOE/Common_functions/readSQL.R")
+source("..\\..\\..\\Common_functions\\Loading_in_packages.R")
+source("..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
 #Load source data
@@ -23,18 +23,8 @@ odbcClose(channel)
 colnames(source1)
 colnames(db1)
 
-#Rename files
-source1 <- plyr::rename(source1, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2016 -- Part 1, Residence-Based Tables"="universe_num1","...2"="universe_num2","...3"="table_num","...4"="content","...5"="universe_desc","...6"="num_cells","...7"="geos","...8"="notes"))
-source2 <- plyr::rename(source2, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2016 -- Part 2, Workplace-Based Tables"="universe_num1","...2"="universe_num2","...3"="table_num","...4"="content","...5"="universe_desc","...6"="num_cells","...7"="geos","...8"="notes"))
-source3 <- plyr::rename(source3, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2016 -- Part 3, Worker Home-to-Work Flow Tables"="universe_num1","...2"="universe_num2","...3"="table_num","...4"="content","...5"="universe_desc","...6"="num_cells","...7"="geos","...8"="notes"))
-db1 <- plyr::rename(db1, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2"="universe_num1", "F2"="universe_num2","F3"="table_num","F4"="content","F5"="universe_desc","F6"="num_cells","F7"="geos","F8"="notes"))
-db2 <- plyr::rename(db2, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2"="universe_num1", "F2"="universe_num2","F3"="table_num","F4"="content","F5"="universe_desc","F6"="num_cells","F7"="geos","F8"="notes"))
-db3 <- plyr::rename(db3, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2"="universe_num1", "F2"="universe_num2","F3"="table_num","F4"="content","F5"="universe_desc","F6"="num_cells","F7"="geos","F8"="notes"))
-
-#Delete Notes Column
-source1 <- select(source1, -"notes") 
-source2 <- select(source2, -"notes")
-source3 <- select(source3, -"notes")
+#Delete unneccessary columns
+source1 <- select(source1, -c("Wave","Type","Indent","Sub Range","1 Year Sourcing","3 Year Sourcing","5 Year Sourcing"))
 
 #Remove unneccessary rows from source_data
 source1 <- source1[grep("Univ #",source1$universe_num1, invert=TRUE),]
