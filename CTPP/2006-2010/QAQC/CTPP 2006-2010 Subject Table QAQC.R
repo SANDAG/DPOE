@@ -1,4 +1,4 @@
-#CTPP 2012-2016 QAQC
+#CTPP 2006-2010 QAQC
 
 #file comparison code between a xls source file and raw upload SQL Table
 
@@ -9,22 +9,22 @@ source("..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
 #Load source data
-file <- "R:/DPOE/CTPP/2012-2016/Documentation/2012-2016 CTPP Requirements.xlsx"
+file <- "R:/DPOE/CTPP/2006-2010/Documentation/2006-2010_CTPP_Documentation for AASHTO-4-24.xlsx"
 source1 <- read_excel(file, sheet = 'Part1Tables')
 source2 <- read_excel(file, sheet = 'Part2Tables')
 source3 <- read_excel(file, sheet = 'Part3Tables')
 
 #Load database data
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
-sql_query1 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_subj_1'
+sql_query1 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_2010_subj1'
 db1 <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
-sql_query2 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_subj_2'
+sql_query2 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_2010_subj2'
 db2 <- sqlQuery(channel,sql_query2,stringsAsFactors = FALSE)
-sql_query3 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_subj_3'
+sql_query3 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_2010_subj3'
 db3 <- sqlQuery(channel,sql_query3,stringsAsFactors = FALSE)
 odbcClose(channel)
 
-#To see column names in source data
+# #To see column names in source data
 # colnames(source1)
 # colnames(db1)
 # colnames(source2)
@@ -33,76 +33,53 @@ odbcClose(channel)
 # colnames(db3)
 
 #Rename files
-source1 <- plyr::rename(source1, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2016 -- Part 1, Residence-Based Tables"="universe_num1","...2"="universe_num2","...3"="table_num","...4"="content","...5"="universe_desc","...6"="num_cells","...7"="geos","...8"="notes"))
-source2 <- plyr::rename(source2, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2016 -- Part 2, Workplace-Based Tables"="universe_num1","...2"="universe_num2","...3"="table_num","...4"="content","...5"="universe_desc","...6"="num_cells","...7"="geos","...8"="notes"))
-source3 <- plyr::rename(source3, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2016 -- Part 3, Worker Home-to-Work Flow Tables"="universe_num1","...2"="universe_num2","...3"="table_num","...4"="content","...5"="universe_desc","...6"="num_cells","...7"="geos","...8"="notes"))
-db1 <- plyr::rename(db1, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2"="universe_num1", "F2"="universe_num2","F3"="table_num","F4"="content","F5"="universe_desc","F6"="num_cells","F7"="geos","F8"="notes"))
-db2 <- plyr::rename(db2, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2"="universe_num1", "F2"="universe_num2","F3"="table_num","F4"="content","F5"="universe_desc","F6"="num_cells","F7"="geos","F8"="notes"))
-db3 <- plyr::rename(db3, c("Census Transportation Planning Products (CTPP) 5-Year ACS 2012-2"="universe_num1", "F2"="universe_num2","F3"="table_num","F4"="content","F5"="universe_desc","F6"="num_cells","F7"="geos","F8"="notes"))
-
-#Delete Notes Column
-source1 <- select(source1, -"notes") 
-source2 <- select(source2, -"notes")
-source3 <- select(source3, -"notes")
-db1 <- select(db1, -"notes") 
-db2 <- select(db2, -"notes")
-db3 <- select(db3, -"notes")
+source1 <- plyr::rename(source1, c("...1"="old_univ_num","...2"="old_unique_num","...3"="old_table_num","...4"="prefix_for_set","...5"="ctpp_part","...6"="univ_num","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2010"="unique_num","...8"="collapse_suffix","...9"="table_num","...10"="content","...11"="universe","...12"="num_cells","...13"="uses_synth_data","...14"="variable_combo","...15"="notes","...16"="collapse_status","...17"="involves_mot"))
+source2 <- plyr::rename(source2, c("...1"="old_univ_num","...2"="old_unique_num","...3"="old_table_num","...4"="prefix_for_set","...5"="ctpp_part","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2010"="univ_num","...7"="unique_num","...8"="collapse_suffix","...9"="table_num","...10"="content","...11"="universe","...12"="num_cells","...13"="uses_synth_data","...14"="variable_combo","...15"="notes","...16"="collapse_status","...17"="involves_mot","...18"="source_table_internal"))
+source3 <- plyr::rename(source3, c("...1"="old_univ_num","...2"="old_unique_num","...3"="old_table_num","...4"="prefix_for_set","...5"="ctpp_part","...6"="univ_num","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2010"="unique_num","...8"="collapse_suffix","...9"="table_num","...10"="content","...11"="universe","...12"="num_cells","...13"="uses_synth_data","...14"="variable_combo","...15"="notes","...16"="collapse_status","...17"="involves_mot"))
+db1 <- plyr::rename(db1, c("F1"="old_univ_num","F2"="old_unique_num","F3"="old_table_num","F4"="prefix_for_set","F5"="ctpp_part","F6"="univ_num","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2"="unique_num","F8"="collapse_suffix","F9"="table_num","F10"="content","F11"="universe","F12"="num_cells","F13"="uses_synth_data","F14"="variable_combo","F15"="notes","F16"="collapse_status","F17"="involves_mot"))
+db2 <- plyr::rename(db2, c("F1"="old_univ_num","F2"="old_unique_num","F3"="old_table_num","F4"="prefix_for_set","F5"="ctpp_part","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2"="univ_num","F7"="unique_num","F8"="collapse_suffix","F9"="table_num","F10"="content","F11"="universe","F12"="num_cells","F13"="uses_synth_data","F14"="variable_combo","F15"="notes","F16"="collapse_status","F17"="involves_mot","F18"="source_table_internal"))
+db3 <- plyr::rename(db3, c("F1"="old_univ_num","F2"="old_unique_num","F3"="old_table_num","F4"="prefix_for_set","F5"="ctpp_part","F6"="univ_num","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2"="unique_num","F8"="collapse_suffix","F9"="table_num","F10"="content","F11"="universe","F12"="num_cells","F13"="uses_synth_data","F14"="variable_combo","F15"="notes","F16"="collapse_status","F17"="involves_mot"))
 
 #Remove unneccessary rows from source_data
-source1 <- source1[grep("Univ #",source1$universe_num1, invert=TRUE),]
-source2 <- source2[grep("Univ #",source2$universe_num1, invert=TRUE),]
-source3 <- source3[grep("Univ #",source3$universe_num1, invert=TRUE),]
-source1 <- source1[grep("NOTE: Tables with an 'A' prefix are derived from standard ACS data, and 'B' tables are derived from privacy protected ACS data.",source1$universe_num1, invert=TRUE),]
-source1 <- source1[-c(103,104,105),]
-source2 <- source2[-c(48,49),]
-source3 <- source3[-c(25,26),]
+source1 <- source1[-c(1:2,191:195),]
+source2 <- source2[-c(1:2,119:121),]
+source3 <- source3[-c(1:2,43:44),]
 
 #Check data types
-<<<<<<< HEAD:CTPP/2006-2010/QAQC/CTPP 2006-2010 Subject Table QAQC.R
-# str(source1)
-# str(db1)
-# str(source2)
-# str(db2)
-# str(source3)
-# str(db3)
-=======
 str(source1)
 str(db1)
 str(source2)
 str(db2)
 str(source3)
 str(db3)
->>>>>>> d3bd10815a03f26b0211de2e2f01108c1f3fd01e:CTPP/2012-2016/QAQC/QAQC.R
 
 #Convert to data frame
 source1 <- as.data.frame(source1)
 source2 <- as.data.frame(source2)
 source3 <- as.data.frame(source3)
-<<<<<<< HEAD:CTPP/2006-2010/QAQC/CTPP 2006-2010 Subject Table QAQC.R
-=======
-db1 <- as.data.frame(db1)
-db2 <- as.data.frame(db2)
-db3 <- as.data.frame(db3)
->>>>>>> d3bd10815a03f26b0211de2e2f01108c1f3fd01e:CTPP/2012-2016/QAQC/QAQC.R
 
 #Convert data types
-source1$universe_num1 <- as.integer(source1$universe_num1)
-source2$universe_num1 <- as.integer(source2$universe_num1)
-source3$universe_num1 <- as.integer(source3$universe_num1)
-source1$universe_num2 <- as.integer(source1$universe_num2)
-source2$universe_num2 <- as.integer(source2$universe_num2)
-source3$universe_num2 <- as.integer(source3$universe_num2)
-source1$num_cells <- as.integer(source1$num_cells)
-source2$num_cells <- as.integer(source2$num_cells)
-source3$num_cells <- as.integer(source3$num_cells)
+source1$old_univ_num <- as.numeric(source1$old_univ_num)
+source1$old_unique_num <- as.numeric(source1$old_unique_num)
+source1$ctpp_part <- as.numeric(source1$ctpp_part)
+source1$univ_num <- as.integer(source1$univ_num)
+source1$unique_num <- as.numeric(source1$unique_num)
+source1$num_cells <- as.numeric(source1$num_cells)
 
-#Order database and source data
-source1 <- source1[order(source1$"universe_num1",source1$"universe_num2",source1$"universe_desc",source1$"content",source1$"num_cells",source1$"geos"),]
-source2 <- source2[order(source2$"universe_num1",source2$"universe_num2",source2$"universe_desc",source2$"content",source2$"num_cells",source2$"geos"),]
-source3 <- source3[order(source3$"universe_num1",source3$"universe_num2",source3$"universe_desc",source3$"content",source3$"num_cells",source3$"geos"),]
-db1 <- db1[order(db1$"universe_num1",db1$"universe_num2",db1$"universe_desc",db1$"content",db1$"num_cells",db1$"geos"),]
-db2 <- db2[order(db2$"universe_num1",db2$"universe_num2",db2$"universe_desc",db2$"content",db2$"num_cells",db2$"geos"),]
-db3 <- db3[order(db3$"universe_num1",db3$"universe_num2",db3$"universe_desc",db3$"content",db3$"num_cells",db3$"geos"),]
+source2$old_univ_num <- as.numeric(source2$old_univ_num)
+source2$old_unique_num <- as.numeric(source2$old_unique_num)
+source2$old_table_num <- as.numeric(source2$old_table_num)
+source2$ctpp_part <- as.numeric(source2$ctpp_part)
+source2$univ_num <- as.integer(source2$univ_num)
+source2$unique_num <- as.numeric(source2$unique_num)
+source2$num_cells <- as.numeric(source2$num_cells)
+
+source3$old_univ_num <- as.numeric(source3$old_univ_num)
+source3$old_unique_num <- as.numeric(source3$old_unique_num)
+source3$ctpp_part <- as.numeric(source3$ctpp_part)
+source3$univ_num <- as.integer(source3$univ_num)
+source3$unique_num <- as.numeric(source3$unique_num)
+source3$num_cells <- as.numeric(source3$num_cells)
 
 
 #delete rownames for checking files match (R assigns arbitrary IDs)
@@ -115,24 +92,32 @@ rownames(db3) <- NULL
 
 # Delete white space
 db1$content <- trimws(db1$content)
-db1$universe_desc <- trimws(db1$universe_desc)
+db1$universe <- trimws(db1$universe)
+
 db2$content <- trimws(db2$content)
-db2$universe_desc <- trimws(db2$universe_desc)
+db2$universe <- trimws(db2$universe)
+db2$notes <- trimws(db2$notes)
+
 db3$content <- trimws(db3$content)
+db3$universe <- trimws(db3$universe)
 
 #Compare files 
 all(source1 == db1) #check cell values only
 all.equal(source1,db1) #check cell values and data types and will return the conflicted cells
 identical(source1,db1) #check cell values and data types
-which(source1!=db1, arr.ind = TRUE) #which commend shows exactly which collumns are incorrect
+which(source1!=db1, arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
 all(source2 == db2) #check cell values only
 all.equal(source2,db2) #check cell values and data types and will return the conflicted cells
 identical(source2,db2) #check cell values and data types
-which(source2!=db2, arr.ind = TRUE) #which commend shows exactly which collumns are incorrect
+which(source2!=db2, arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
 all(source3 == db3) #check cell values only
 all.equal(source3,db3) #check cell values and data types and will return the conflicted cells
 identical(source3,db3) #check cell values and data types
-which(source3!=db3, arr.ind = TRUE) #which commend shows exactly which collumns are incorrect
+which(source3!=db3, arr.ind = TRUE) #which command shows exactly which columns are incorrect
+
+#Missing values. Need to reload table into sql using openrowset
+unique(source2$old_table_num)
+unique(db2$old_table_num)
 
