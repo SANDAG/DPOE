@@ -24,14 +24,6 @@ sql_query3 <- 'SELECT * FROM dpoe_stage.dbo.ctpp_2010_subj3'
 db3 <- sqlQuery(channel,sql_query3,stringsAsFactors = FALSE)
 odbcClose(channel)
 
-# #To see column names in source data
-# colnames(source1)
-# colnames(db1)
-# colnames(source2)
-# colnames(db2)
-# colnames(source3)
-# colnames(db3)
-
 #Rename files
 source1 <- plyr::rename(source1, c("...1"="old_univ_num","...2"="old_unique_num","...3"="old_table_num","...4"="prefix_for_set","...5"="ctpp_part","...6"="univ_num","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2010"="unique_num","...8"="collapse_suffix","...9"="table_num","...10"="content","...11"="universe","...12"="num_cells","...13"="uses_synth_data","...14"="variable_combo","...15"="notes","...16"="collapse_status","...17"="involves_mot"))
 source2 <- plyr::rename(source2, c("...1"="old_univ_num","...2"="old_unique_num","...3"="old_table_num","...4"="prefix_for_set","...5"="ctpp_part","Census Transportation Planning Products (CTPP) 5-Year ACS 2006-2010"="univ_num","...7"="unique_num","...8"="collapse_suffix","...9"="table_num","...10"="content","...11"="universe","...12"="num_cells","...13"="uses_synth_data","...14"="variable_combo","...15"="notes","...16"="collapse_status","...17"="involves_mot","...18"="source_table_internal"))
@@ -45,13 +37,21 @@ source1 <- source1[-c(1:2,191:195),]
 source2 <- source2[-c(1:2,119:121),]
 source3 <- source3[-c(1:2,43:44),]
 
+#Drop unneccessary columns
+db1 <- db1[,-c(3,15)]
+source1 <- source1[,-c(3,15)]
+db2 <- db2[,-c(3,15,18)]
+source2 <- source2[,-c(3,15,18)]
+db3 <- db3[,-c(3,15)]
+source3 <- source3[,-c(3,15)]
+
 #Check data types
-str(source1)
-str(db1)
-str(source2)
-str(db2)
-str(source3)
-str(db3)
+# str(source1)
+# str(db1)
+# str(source2)
+# str(db2)
+# str(source3)
+# str(db3)
 
 #Convert to data frame
 source1 <- as.data.frame(source1)
@@ -81,7 +81,6 @@ source3$univ_num <- as.integer(source3$univ_num)
 source3$unique_num <- as.numeric(source3$unique_num)
 source3$num_cells <- as.numeric(source3$num_cells)
 
-
 #delete rownames for checking files match (R assigns arbitrary IDs)
 rownames(source1) <- NULL
 rownames(db1) <- NULL
@@ -96,10 +95,11 @@ db1$universe <- trimws(db1$universe)
 
 db2$content <- trimws(db2$content)
 db2$universe <- trimws(db2$universe)
-db2$notes <- trimws(db2$notes)
 
 db3$content <- trimws(db3$content)
 db3$universe <- trimws(db3$universe)
+db3$table_num <- trimws(db3$table_num)
+db3$collapse_suffix <- trimws(db3$collapse_suffix)
 
 #Compare files 
 all(source1 == db1) #check cell values only
@@ -117,7 +117,44 @@ all.equal(source3,db3) #check cell values and data types and will return the con
 identical(source3,db3) #check cell values and data types
 which(source3!=db3, arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
-#Missing values. Need to reload table into sql using openrowset
-unique(source2$old_table_num)
-unique(db2$old_table_num)
+####################################################################################################################################################################
 
+#file comparison code between source file and final SQL Table
+
+#Load database data
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
+sql_query1 <- 'SELECT * FROM dpoe_stage.dim.ctpp_subject_table where yr = 2010'
+final <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
+odbcClose(channel)
+
+#Merge source files into one
+source <- do.call("rbind", list(source1, source2, source3))
+
+#Drop unneccessary columns
+final<- final[,-c(1:3)]
+source <- source[,-c(1:7,11:15)]
+
+#Rename files
+source <- plyr::rename(source, c("table_num"="tbl_name","content"="tbl_desc"))
+
+#Check data types
+# str(source)
+# str(final)
+
+#Trim whitespace
+final$tbl_name <- trimws(final$tbl_name)
+final$tbl_desc <- trimws(final$tbl_desc)
+final$universe <- trimws(final$universe)
+
+#delete rownames for checking files match (R assigns arbitrary IDs)
+rownames(source) <- NULL
+rownames(final) <- NULL
+
+#Compare files 
+all(source == final) #check cell values only
+all.equal(source,final) #check cell values and data types and will return the conflicted cells
+identical(source,final) #check cell values and data types
+which(source!=final, arr.ind = TRUE) #which command shows exactly which columns are incorrect
+
+# source[188,3]
+# final[188,3]
