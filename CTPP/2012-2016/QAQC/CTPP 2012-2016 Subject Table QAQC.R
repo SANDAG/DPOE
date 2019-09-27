@@ -62,8 +62,8 @@ source3 <- source3[-c(25,26),]
 # str(db1)
 # str(source2)
 # str(db2)
-# str(source3)
-# str(db3)
+str(source3)
+str(db3)
 
 #Convert to data frame
 source1 <- as.data.frame(source1)
@@ -76,10 +76,10 @@ source2$universe_num1 <- as.integer(source2$universe_num1)
 source3$universe_num1 <- as.integer(source3$universe_num1)
 source1$universe_num2 <- as.integer(source1$universe_num2)
 source2$universe_num2 <- as.integer(source2$universe_num2)
-source3$universe_num2 <- as.integer(source3$universe_num2)
+source3$universe_num2 <- as.numeric(source3$universe_num2)
 source1$num_cells <- as.integer(source1$num_cells)
 source2$num_cells <- as.integer(source2$num_cells)
-source3$num_cells <- as.integer(source3$num_cells)
+source3$num_cells <- as.numeric(source3$num_cells)
 
 #Order database and source data
 source1 <- source1[order(source1$"universe_num1",source1$"universe_num2",source1$"universe_desc",source1$"content",source1$"num_cells",source1$"geos"),]
@@ -121,3 +121,48 @@ all.equal(source3,db3) #check cell values and data types and will return the con
 identical(source3,db3) #check cell values and data types
 which(source3!=db3, arr.ind = TRUE) #which commend shows exactly which collumns are incorrect
 
+####################################################################################################################################################################
+
+#file comparison code between source file and final SQL Table
+
+#Load database data
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
+sql_query1 <- 'SELECT * FROM dpoe_stage.dim.ctpp_subject_table where yr = 2016'
+final <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
+odbcClose(channel)
+
+#Merge source files into one
+source <- do.call("rbind", list(source1, source2, source3))
+
+#Drop unneccessary columns
+final<- final[,-c(1:3)]
+source <- source[,-c(1:2,6:7)]
+
+#Rename files
+source <- plyr::rename(source, c("table_num"="tbl_name","content"="tbl_desc","universe_desc"="universe"))
+
+#Check data types
+# str(source)
+# str(final)
+
+#Trim whitespace
+final$tbl_name <- trimws(final$tbl_name)
+final$tbl_desc <- trimws(final$tbl_desc)
+final$universe <- trimws(final$universe)
+
+#Order table
+source <- source[order(source$"tbl_name",source$"tbl_desc",source$"universe"),]
+final <- final[order(final$"tbl_name",final$"tbl_desc",final$"universe"),]
+
+#delete rownames for checking files match (R assigns arbitrary IDs)
+rownames(source) <- NULL
+rownames(final) <- NULL
+
+#Compare files 
+all(source == final) #check cell values only
+all.equal(source,final) #check cell values and data types and will return the conflicted cells
+identical(source,final) #check cell values and data types
+which(source!=final, arr.ind = TRUE) #which command shows exactly which columns are incorrect
+
+source[17,1]
+final[17,1]
