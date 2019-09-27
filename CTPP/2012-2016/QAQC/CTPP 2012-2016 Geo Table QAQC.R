@@ -23,7 +23,8 @@ odbcClose(channel)
 # colnames(db1)
 
 #Rename source data
-source1 <- plyr::rename(source1, c("Format of Summary Levels for the CTPP 2012-2016 5-Year Special Tab"="summary_level","...2"="summary_level_desc","...3"="geo_id_variables","...4"="format"))
+source1 <- plyr::rename(source1, c("Format of Summary Levels for the CTPP 2012-2016 5-Year Special Tab"="summary_level","...2"="summary_level_desc","...3"="geoid_variables","...4"="geoid_format"))
+db1 <- plyr::rename(db1, c("geo_id_variables"="geoid_variables","format"="geoid_format"))
 
 #Remove nas from source_data
 source1<- source1[-c(1:2,14,26,44:63),]
@@ -57,17 +58,6 @@ odbcClose(channel)
 
 #Delete unneccessary columns
 final<- final[,-c(1:3)]
-
-#Column names
-# colnames(final)
-# colnames(source1)
-
-#Rename source data
-source1 <- plyr::rename(source1, c("geo_id_variables"="geoid_variables", "format"="geoid_format"))
-
-#Check data types
-# str(source1)
-# str(final)
 
 #delete rownames for checking files match (R assigns arbitrary IDs)
 rownames(source1) <- NULL
