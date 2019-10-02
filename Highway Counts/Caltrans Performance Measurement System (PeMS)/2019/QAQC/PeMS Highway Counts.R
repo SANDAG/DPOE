@@ -74,11 +74,6 @@ which(source!=db, arr.ind=TRUE)
 
 #PeMS Highway Counts 11/2018-08/2019 Station Hour
 
-# display more digits
-options(digits=15)
-
-# File Comparison between source data and database data
-
 #Read in text files
 source1 <- read.delim("R:\\DPOE\\Highway Counts\\Caltrans Performance Measurement System (PeMS)\\2019\\Station hour\\Source\\d11_text_station_hour_2018_11.txt", header=FALSE, sep=",")
 source2 <- read.delim("R:\\DPOE\\Highway Counts\\Caltrans Performance Measurement System (PeMS)\\2019\\Station hour\\Source\\d11_text_station_hour_2018_12.txt", header=FALSE, sep=",")
@@ -119,8 +114,10 @@ str(db)
 #unique(source$timestamp)
 
 #Convert data types
-source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
-db$timestamp <- format(as.Date(db$timestamp, format = "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+# source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+# db$timestamp <- format(as.Date(db$timestamp, format = "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+source$timestamp <- as.POSIXct.Date(source$timestamp)
+db$timestamp <- as.POSIXct.Date(db$timestamp)
 source$direction <- as.character(source$direction)
 source$type <- as.character(source$type)
 
@@ -128,16 +125,14 @@ source$type <- as.character(source$type)
 source <- source[order(source$timestamp,source$station,source$district,source$route,source$direction,source$type,source$seg_length,source$samples,source$observed,source$total_flow,source$avg_occ,source$avg_speed,source$delay35,source$delay40,source$delay45,source$delay50,source$delay55,source$delay60,source$l1_flow,source$l1_occ,source$l1_speed,source$l2_flow,source$l2_occ,source$l2_speed,source$l3_flow,source$l3_occ,source$l3_speed,source$l4_flow,source$l4_occ,source$l4_speed,source$l5_flow,source$l5_occ,source$l5_speed,source$l6_flow,source$l6_occ,source$l6_speed,source$l7_flow,source$l7_occ,source$l7_speed,source$l8_flow,source$l8_occ,source$l8_speed),]
 db <- db[order(db$timestamp,db$station,db$district,db$route,db$direction,db$type,db$seg_length,db$samples,db$observed,db$total_flow,db$avg_occ,db$avg_speed,db$delay35,db$delay40,db$delay45,db$delay50,db$delay55,db$delay60,db$l1_flow,db$l1_occ,db$l1_speed,db$l2_flow,db$l2_occ,db$l2_speed,db$l3_flow,db$l3_occ,db$l3_speed,db$l4_flow,db$l4_occ,db$l4_speed,db$l5_flow,db$l5_occ,db$l5_speed,db$l6_flow,db$l6_occ,db$l6_speed,db$l7_flow,db$l7_occ,db$l7_speed,db$l8_flow,db$l8_occ,db$l8_speed),]
 
-# source <- source[
-#   with(source, order(timestamp,station,district,route,direction,type,seg_length,samples,observed,total_flow,avg_occ,avg_speed,delay35,delay40,delay45,delay50,delay55,delay60,l1_flow,l1_occ,l1_speed,l2_flow,l2_occ,l2_speed,l3_flow,l3_occ,l3_speed,l4_flow,l4_occ,l4_speed,l5_flow,l5_occ,l5_speed,l6_flow,l6_occ,l6_speed,l7_flow,l7_occ,l7_speed,l8_flow,l8_occ,l8_speed)),
-#   ]
-# db <- db[
-#   with(db, order(timestamp,station,district,route,direction,type,seg_length,samples,observed,total_flow,avg_occ,avg_speed,delay35,delay40,delay45,delay50,delay55,delay60,l1_flow,l1_occ,l1_speed,l2_flow,l2_occ,l2_speed,l3_flow,l3_occ,l3_speed,l4_flow,l4_occ,l4_speed,l5_flow,l5_occ,l5_speed,l6_flow,l6_occ,l6_speed,l7_flow,l7_occ,l7_speed,l8_flow,l8_occ,l8_speed)),
-#   ]
-
 #delete rownames for checking files match
 rownames(source) <- NULL
 rownames(db) <- NULL
+
+# issue with timestamps
+# d1727 <- subset(db,total_flow==1727 & station ==1126974)
+# s1727 <- subset(source,total_flow==1727 & station ==1126974)
+# all.equal(s1727,d1727)
 
 # compare source and to database files to ensure they match
 all(source == db)
@@ -145,8 +140,30 @@ all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
 
-db[1503,1]
-source[1503,1]
+# db[25535,1]
+# source[25535,1]
+# 
+# unique(timestamp)
+# unique(db$timestamp)
 
-unique(timestamp)
-unique(db$timestamp)
+#########################################################################################################################
+# #testing
+# test_db<- db[,-1]
+# test_source <- source[,-1]
+# 
+# #Order data frames for comparison
+# test_source <- test_source[order(test_source$station,test_source$district,test_source$route,test_source$direction,test_source$type,test_source$seg_length,test_source$samples,test_source$observed,test_source$total_flow,test_source$avg_occ,test_source$avg_speed,test_source$delay35,test_source$delay40,test_source$delay45,test_source$delay50,test_source$delay55,test_source$delay60,test_source$l1_flow,test_source$l1_occ,test_source$l1_speed,test_source$l2_flow,test_source$l2_occ,test_source$l2_speed,test_source$l3_flow,test_source$l3_occ,test_source$l3_speed,test_source$l4_flow,test_source$l4_occ,test_source$l4_speed,test_source$l5_flow,test_source$l5_occ,test_source$l5_speed,test_source$l6_flow,test_source$l6_occ,test_source$l6_speed,test_source$l7_flow,test_source$l7_occ,test_source$l7_speed,test_source$l8_flow,test_source$l8_occ,test_source$l8_speed),]
+# test_db <- test_db[order(test_db$station,test_db$district,test_db$route,test_db$direction,test_db$type,test_db$seg_length,test_db$samples,test_db$observed,test_db$total_flow,test_db$avg_occ,test_db$avg_speed,test_db$delay35,test_db$delay40,test_db$delay45,test_db$delay50,test_db$delay55,test_db$delay60,test_db$l1_flow,test_db$l1_occ,test_db$l1_speed,test_db$l2_flow,test_db$l2_occ,test_db$l2_speed,test_db$l3_flow,test_db$l3_occ,test_db$l3_speed,test_db$l4_flow,test_db$l4_occ,test_db$l4_speed,test_db$l5_flow,test_db$l5_occ,test_db$l5_speed,test_db$l6_flow,test_db$l6_occ,test_db$l6_speed,test_db$l7_flow,test_db$l7_occ,test_db$l7_speed,test_db$l8_flow,test_db$l8_occ,test_db$l8_speed),]
+# 
+# #delete rownames for checking files match
+# rownames(test_source) <- NULL
+# rownames(test_db) <- NULL
+# 
+# # compare source and to database files to ensure they match
+# all(test_source == test_db)
+# all.equal(test_source,test_db)
+# identical(test_source,test_db)
+# which(test_source!=test_db, arr.ind=TRUE)
+# 
+# test_db[18,1]
+# test_source[18,1]
