@@ -12,7 +12,7 @@ getwd()
 year=2017
 
 #Read in source data
-source_data <- read.csv(paste("R:\\DPOE\\CARB Fleet Data\\CARB\\",year,"\\QAQC\\FleetDB-County-SANDIEGO-",year,"-Clean_concatenated.csv",sep=''), stringsAsFactors = FALSE)
+source_data <- read.csv(paste("R:\\DPOE\\Fleet Data\\CARB\\",year,"\\QAQC\\FleetDB-County-SANDIEGO-",year,"-Clean_concatenated.csv",sep=''), stringsAsFactors = FALSE)
 
 #To see column names in source data
 # colnames(source_data)
