@@ -110,14 +110,21 @@ source <- plyr::rename(source, c("V1"="timestamp","V2"="station","V3"="district"
 str(source)
 str(db)
 
-#Check distinct values
-#unique(source$timestamp)
+# #Get test data frame
+# test_source <- tail(source)
+# test_db <- tail(db)
+
+
+
+test_source$timestamp2 <- as.character(test_source$timestamp)
+test_source$timestamp3 <- strptime(test_source$timestamp2, format = "%m/%d/%Y %H:%M:%S")
+test_source$timestamp4 <- as.POSIXct(test_source$timestamp3)
 
 #Convert data types
-# source$timestamp <- format(as.Date(source$timestamp, format = "%m/%d/%Y %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
-# db$timestamp <- format(as.Date(db$timestamp, format = "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
-source$timestamp <- as.POSIXct.Date(source$timestamp)
-db$timestamp <- as.POSIXct.Date(db$timestamp)
+source$timestamp <- as.character(source$timestamp)
+source$timestamp <- strptime(source$timestamp, format = "%m/%d/%Y %H:%M:%S")
+source$timestamp2 <- as.POSIXct(source$timestamp)
+
 source$direction <- as.character(source$direction)
 source$type <- as.character(source$type)
 
