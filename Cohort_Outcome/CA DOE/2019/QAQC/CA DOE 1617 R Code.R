@@ -2,19 +2,11 @@
 
 # file comparison code between a CSV source file and raw upload SQL Table
 
-#Reading in packages
-pkgTest <- function(pkg){
-  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg))
-    install.packages(new.pkg, dep = TRUE)
-  sapply(pkg, require, character.only = TRUE)
-  
-  
-}
-packages <- c("data.table", "ggplot2", "scales", "sqldf", "rstudioapi", "RODBC", "reshape2", 
-              "stringr","tidyverse", "plyr", "readxl", "readr", "reshape", "taRifx")
-pkgTest(packages)
-
+#set working directory and access code to read in SQL queries
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
+source("..\\..\\..\\..\\Common_functions\\readSQL.R")
+getwd()
 
 #Read in source and database files
 source_data <- read.delim("R:\\DPOE\\CA DOE\\CALPADS\\Source\\cohort1617.txt")
@@ -26,8 +18,8 @@ database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 
 #To see column names in data
-colnames(source_data)
-colnames(database_data)
+# colnames(source_data)
+# colnames(database_data)
 
 #Rename columns
 source_data <- plyr::rename(source_data, c("ï..AcademicYear"="AcademicYear", "Regular.HS.Diploma.Graduates..Count."="Regular HS Diploma Graduates (Count)",
@@ -42,12 +34,12 @@ source_data <- plyr::rename(source_data, c("ï..AcademicYear"="AcademicYear", "Re
                                            "Other.Transfer..Rate."="Other Transfer (Rate)", "Still.Enrolled..Count."="Still Enrolled (Count)"))
 
 #Verify that this worked
-all(colnames(source_data) == colnames(database_data))
+# all(colnames(source_data) == colnames(database_data))
 
 #Check data types
-str(source_data)
-str(database_data)
-all(str(source_data) == str(database_data))
+# str(source_data)
+# str(database_data)
+# all(str(source_data) == str(database_data))
 
 #Create column name list
 # source_names <- colnames(source_data)
@@ -110,9 +102,6 @@ database_data <- database_data[order(database_data$"AcademicYear",database_data$
 rownames(source_data) <- NULL
 rownames(database_data) <- NULL
 
-#Verify that this worked
-all(rownames(source_data) == rownames(database_data))
-
 #compare files 
 all(source_data == database_data) #check cell values only
 all.equal(source_data,database_data) #check cell values and data types and will return the conflicted cells
@@ -124,129 +113,52 @@ which(source_data!=database_data,arr.ind=TRUE)
 
 #Compare source data to fact table
 
-#set working directory and access code to read in SQL queries
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-source("../QAQC/readSQL.R")
-
-getwd()
-
-#turn off strings reading in as factors
+#Read in sql query
 options(stringsAsFactors=FALSE)
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
-
-#Read in sql query
 sql_query <- 'SELECT * FROM [dpoe_stage].[staging].[cohort_outcome]'
 cohort<-sqlQuery(channel,sql_query)
 odbcClose(channel)
 
 #To see column names in cohort data
-colnames(cohort)
-colnames(source_data)
+# colnames(cohort)
+# colnames(source_data)
 
 #Rename source data to match fact table. Make sure order is the same in both datasets.
 source_data <- plyr::rename(source_data, c("Golden State Seal Merit Diploma (Rate"="Golden State Seal Merit Diploma (Rate)"))
 
-#Verify that this worked
-all(colnames(source_data) == colnames(cohort))
-
 #Check data types
-str(source_data)
-str(cohort)
-all(str(cohort) == str(source_data))
+# str(source_data)
+# str(cohort)
 
 #Convert data types
-source_data$CohortStudents <- destring(source_data$CohortStudents)
 source_data$CohortStudents <- as.integer(source_data$CohortStudents)
-source_data$"Regular HS Diploma Graduates (Count)" <- destring(source_data$"Regular HS Diploma Graduates (Count)")
 source_data$"Regular HS Diploma Graduates (Count)" <- as.integer(source_data$"Regular HS Diploma Graduates (Count)")
-source_data$"Regular HS Diploma Graduates (Rate)" <- destring(source_data$"Regular HS Diploma Graduates (Rate)")
 source_data$"Regular HS Diploma Graduates (Rate)" <- as.numeric(source_data$"Regular HS Diploma Graduates (Rate)")
-source_data$"Met UC CSU Grad Req's (Count)" <- destring(source_data$"Met UC CSU Grad Req's (Count)")
 source_data$"Met UC CSU Grad Req's (Count)" <- as.integer(source_data$"Met UC CSU Grad Req's (Count)")
-source_data$"Met UC CSU Grad Req's (Rate)" <- destring(source_data$"Met UC CSU Grad Req's (Rate)")
 source_data$"Met UC CSU Grad Req's (Rate)" <- as.numeric(source_data$"Met UC CSU Grad Req's (Rate)")
-source_data$"Seal of Biliteracy (Count)" <- destring(source_data$"Seal of Biliteracy (Count)")
 source_data$"Seal of Biliteracy (Count)" <- as.integer(source_data$"Seal of Biliteracy (Count)")
-source_data$"Seal of Biliteracy (Rate)" <- destring(source_data$"Seal of Biliteracy (Rate)")
 source_data$"Seal of Biliteracy (Rate)" <- as.numeric(source_data$"Seal of Biliteracy (Rate)")
-source_data$"Golden State Seal Merit Diploma (Count)" <- destring(source_data$"Golden State Seal Merit Diploma (Count)")
 source_data$"Golden State Seal Merit Diploma (Count)" <- as.integer(source_data$"Golden State Seal Merit Diploma (Count)")
-source_data$"Golden State Seal Merit Diploma (Rate)" <- destring(source_data$"Golden State Seal Merit Diploma (Rate)")
 source_data$"Golden State Seal Merit Diploma (Rate)" <- as.numeric(source_data$"Golden State Seal Merit Diploma (Rate)")
-source_data$"CHSPE Completer (Count)" <- destring(source_data$"CHSPE Completer (Count)")
 source_data$"CHSPE Completer (Count)" <- as.integer(source_data$"CHSPE Completer (Count)")
-source_data$"CHSPE Completer (Rate)" <- destring(source_data$"CHSPE Completer (Rate)")
 source_data$"CHSPE Completer (Rate)" <- as.numeric(source_data$"CHSPE Completer (Rate)")
-source_data$"Adult Ed  HS Diploma (Count)" <- destring(source_data$"Adult Ed  HS Diploma (Count)")
 source_data$"Adult Ed  HS Diploma (Count)" <- as.integer(source_data$"Adult Ed  HS Diploma (Count)")
-source_data$"Adult Ed  HS Diploma (Rate)" <- destring(source_data$"Adult Ed  HS Diploma (Rate)")
 source_data$"Adult Ed  HS Diploma (Rate)" <- as.numeric(source_data$"Adult Ed  HS Diploma (Rate)")
-source_data$"SPED Certificate (Count)" <- destring(source_data$"SPED Certificate (Count)")
 source_data$"SPED Certificate (Count)" <- as.integer(source_data$"SPED Certificate (Count)")
-source_data$"SPED Certificate (Rate)" <- destring(source_data$"SPED Certificate (Rate)")
 source_data$"SPED Certificate (Rate)" <- as.numeric(source_data$"SPED Certificate (Rate)")
-source_data$"GED Completer (Count)" <- destring(source_data$"GED Completer (Count)")
 source_data$"GED Completer (Count)" <- as.integer(source_data$"GED Completer (Count)")
-source_data$"GED Completer (Rate)" <- destring(source_data$"GED Completer (Rate)")
 source_data$"GED Completer (Rate)" <- as.numeric(source_data$"GED Completer (Rate)")
-source_data$"Other Transfer (Count)" <- destring(source_data$"Other Transfer (Count)")
 source_data$"Other Transfer (Count)" <- as.integer(source_data$"Other Transfer (Count)")
-source_data$"Other Transfer (Rate)" <- destring(source_data$"Other Transfer (Rate)")
 source_data$"Other Transfer (Rate)" <- as.numeric(source_data$"Other Transfer (Rate)")
-source_data$"Dropout (Count)" <- destring(source_data$"Dropout (Count)")
 source_data$"Dropout (Count)" <- as.integer(source_data$"Dropout (Count)")
-source_data$"Dropout (Rate)" <- destring(source_data$"Dropout (Rate)")
 source_data$"Dropout (Rate)" <- as.numeric(source_data$"Dropout (Rate)")
-source_data$"Still Enrolled (Count)" <- destring(source_data$"Still Enrolled (Count)")
 source_data$"Still Enrolled (Count)" <- as.integer(source_data$"Still Enrolled (Count)")
-source_data$"Still Enrolled (Rate)" <- destring(source_data$"Still Enrolled (Rate)")
 source_data$"Still Enrolled (Rate)" <- as.numeric(source_data$"Still Enrolled (Rate)")
-
-#Find unique values in columns
-# unique(source_data$DistrictCode)
-# unique(cohort$DistrictCode)
-# unique(source_data$SchoolCode)
-# unique(cohort$SchoolCode)
 
 #Convert NA's to 0s
 source_data$DistrictCode[is.na(source_data$DistrictCode)] <- 0
 source_data$SchoolCode[is.na(source_data$SchoolCode)] <- 0
-
-#Change *s in source_data to nulls to match cohort table
-# source_data$"AcademicYear"[source_data$"AcademicYear"=="*"] <- NULL
-# source_data$"AggregateLevel"[source_data$"AggregateLevel"=="*"] <- NULL
-# source_data$"CountyCode"[source_data$"CountyCode"=="*"] <- NULL
-# source_data$"DistrictCode"[source_data$"DistrictCode"=="*"] <- NULL
-# source_data$"SchoolCode"[source_data$"SchoolCode"=="*"] <- NULL
-# source_data$"CountyName"[source_data$"CountyName"=="*"] <- NULL
-# source_data$"DistrictName"[source_data$"DistrictName"=="*"] <- NULL
-# source_data$"SchoolName"[source_data$"SchoolName"=="*"] <- NULL
-# source_data$"CharterSchool"[source_data$"CharterSchool"=="*"] <- NULL
-# source_data$"DASS"[source_data$"DASS"=="*"] <- NULL
-# source_data$"ReportingCategory"[source_data$"ReportingCategory"=="*"] <- NULL
-# source_data$"CohortStudents"[source_data$"CohortStudents"=="*"] <- NULL
-# source_data$"Regular HS Diploma Graduates (Count)"[source_data$"Regular HS Diploma Graduates (Count)"=="*"] <- NULL
-# source_data$"Regular HS Diploma Graduates (Rate)"[source_data$"Regular HS Diploma Graduates (Rate)"=="*"] <- NULL
-# source_data$"Met UC CSU Grad Req's (Count)"[source_data$"Met UC CSU Grad Req's (Count)"=="*"] <- NULL
-# source_data$"Met UC CSU Grad Req's (Rate)"[source_data$"Met UC CSU Grad Req's (Rate)"=="*"] <- NULL
-# source_data$"Seal of Biliteracy (Count)"[source_data$"Seal of Biliteracy (Count)"=="*"] <- NULL
-# source_data$"Seal of Biliteracy (Rate)"[source_data$"Seal of Biliteracy (Rate)"=="*"] <- NULL
-# source_data$"Golden State Seal Merit Diploma (Count)"[source_data$"Golden State Seal Merit Diploma (Count)"=="*"] <- NULL
-# source_data$"Golden State Seal Merit Diploma (Rate)"[source_data$"Golden State Seal Merit Diploma (Rate)"=="*"] <- NULL
-# source_data$"CHSPE Completer (Count)"[source_data$"CHSPE Completer (Count)"=="*"] <- NULL
-# source_data$"CHSPE Completer (Rate)"[source_data$"CHSPE Completer (Rate)"=="*"] <- NULL
-# source_data$"Adult Ed  HS Diploma (Count)"[source_data$"Adult Ed  HS Diploma (Count)"=="*"] <- NULL
-# source_data$"Adult Ed  HS Diploma (Rate)"[source_data$"Adult Ed  HS Diploma (Rate)"=="*"] <- NULL
-# source_data$"SPED Certificate (Count)"[source_data$"SPED Certificate (Count)"=="*"] <- NULL
-# source_data$"SPED Certificate (Rate)"[source_data$"SPED Certificate (Rate)"=="*"] <- NULL
-# source_data$"GED Completer (Count)"[source_data$"GED Completer (Count)"=="*"] <- NULL
-# source_data$"GED Completer (Rate)"[source_data$"GED Completer (Rate)"=="*"] <- NULL
-# source_data$"Other Transfer (Count)"[source_data$"Other Transfer (Count)"=="*"] <- NULL
-# source_data$"Other Transfer (Rate)"[source_data$"Other Transfer (Rate)"=="*"] <- NULL
-# source_data$"Dropout (Count)"[source_data$"Dropout (Count)"=="*"] <- NULL
-# source_data$"Dropout (Rate)"[source_data$"Dropout (Rate)"=="*"] <- NULL
-# source_data$"Still Enrolled (Count)"[source_data$"Still Enrolled (Count)"=="*"] <- NULL
-# source_data$"Still Enrolled (Rate)"[source_data$"Still Enrolled (Rate)"=="*"] <- NULL
 
 #Order table cohort
 cohort <- cohort[order(cohort$"AcademicYear",cohort$"AggregateLevel",cohort$"CountyCode",cohort$"DistrictCode",cohort$"SchoolCode",cohort$"CountyName",cohort$"DistrictName",cohort$"SchoolName",cohort$"CharterSchool",cohort$"DASS",cohort$"ReportingCategory",cohort$"CohortStudents",
@@ -255,7 +167,6 @@ cohort <- cohort[order(cohort$"AcademicYear",cohort$"AggregateLevel",cohort$"Cou
                        cohort$"SPED Certificate (Count)",cohort$"SPED Certificate (Rate)",cohort$"GED Completer (Count)",cohort$"GED Completer (Rate)",cohort$"Other Transfer (Count)",cohort$"Other Transfer (Rate)",cohort$"Dropout (Count)",cohort$"Dropout (Rate)",
                        cohort$"Still Enrolled (Count)",cohort$"Still Enrolled (Rate)"),]
 
-#Order table source_data
 #Order source data table
 source_data <- source_data[order(source_data$"AcademicYear",source_data$"AggregateLevel",source_data$"CountyCode",source_data$"DistrictCode",source_data$"SchoolCode",source_data$"CountyName",source_data$"DistrictName",source_data$"SchoolName",source_data$"CharterSchool",
                                  source_data$"DASS",source_data$"ReportingCategory",source_data$"CohortStudents",source_data$"Regular HS Diploma Graduates (Count)",source_data$"Regular HS Diploma Graduates (Rate)",source_data$"Met UC CSU Grad Req's (Count)",
