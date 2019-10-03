@@ -26,9 +26,7 @@ str(source)
 str(db)
 
 #Change data types to date
-#source$Month <- as.Date(source$Month, "%Y-%m")
 db$Month <- format(as.Date(db$Month, format = "%Y-%m-%d"), "%Y-%m")
-#db$Month <- as.Date(db$Month,  "%Y-%m")
 
 #Order table
 source <- source[order(source$StartId, source$EndId, source$Month, source$PartOfWeek, source$HourOfDay, source$TripPurpose, source$Count, source$InSanDiegoCounty),]
