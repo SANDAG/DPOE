@@ -66,10 +66,6 @@ all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
 
-# example of differences between 2 dataframes
-# db[87,7]
-# source[87,7]
-
 ######################################################################################################################################################
 
 #PeMS Highway Counts 11/2018-08/2019 Station Hour
@@ -107,26 +103,16 @@ odbcClose(channel)
 source <- plyr::rename(source, c("V1"="timestamp","V2"="station","V3"="district","V4"="route","V5"="direction","V6"="type","V7"="seg_length","V8"="samples","V9"="observed","V10"="total_flow","V11"="avg_occ","V12"="avg_speed","V13"="delay35","V14"="delay40","V15"="delay45","V16"="delay50","V17"="delay55","V18"="delay60","V19"="l1_flow","V20"="l1_occ","V21"="l1_speed","V22"="l2_flow","V23"="l2_occ","V24"="l2_speed","V25"="l3_flow","V26"="l3_occ","V27"="l3_speed","V28"="l4_flow","V29"="l4_occ","V30"="l4_speed","V31"="l5_flow","V32"="l5_occ","V33"="l5_speed","V34"="l6_flow","V35"="l6_occ","V36"="l6_speed","V37"="l7_flow","V38"="l7_occ","V39"="l7_speed","V40"="l8_flow","V41"="l8_occ","V42"="l8_speed"))
 
 #Check data types
-str(source)
-str(db)
-
-# #Get test data frame
-# test_source <- tail(source)
-# test_db <- tail(db)
-
-
-
-test_source$timestamp2 <- as.character(test_source$timestamp)
-test_source$timestamp3 <- strptime(test_source$timestamp2, format = "%m/%d/%Y %H:%M:%S")
-test_source$timestamp4 <- as.POSIXct(test_source$timestamp3)
+# str(source)
+# str(db)
 
 #Convert data types
-source$timestamp <- as.character(source$timestamp)
-source$timestamp <- strptime(source$timestamp, format = "%m/%d/%Y %H:%M:%S")
-source$timestamp2 <- as.POSIXct(source$timestamp)
-
 source$direction <- as.character(source$direction)
 source$type <- as.character(source$type)
+
+#Convert timestamp column to character
+source$timestamp <- as.character(source$timestamp)
+db$timestamp <- format(as.POSIXct(db$timestamp, format = "%Y-%m-%d %H:%M:%S"), "%m/%d/%Y %H:%M:%S")
 
 #Order data frames for comparison
 source <- source[order(source$timestamp,source$station,source$district,source$route,source$direction,source$type,source$seg_length,source$samples,source$observed,source$total_flow,source$avg_occ,source$avg_speed,source$delay35,source$delay40,source$delay45,source$delay50,source$delay55,source$delay60,source$l1_flow,source$l1_occ,source$l1_speed,source$l2_flow,source$l2_occ,source$l2_speed,source$l3_flow,source$l3_occ,source$l3_speed,source$l4_flow,source$l4_occ,source$l4_speed,source$l5_flow,source$l5_occ,source$l5_speed,source$l6_flow,source$l6_occ,source$l6_speed,source$l7_flow,source$l7_occ,source$l7_speed,source$l8_flow,source$l8_occ,source$l8_speed),]
@@ -136,22 +122,11 @@ db <- db[order(db$timestamp,db$station,db$district,db$route,db$direction,db$type
 rownames(source) <- NULL
 rownames(db) <- NULL
 
-# issue with timestamps
-# d1727 <- subset(db,total_flow==1727 & station ==1126974)
-# s1727 <- subset(source,total_flow==1727 & station ==1126974)
-# all.equal(s1727,d1727)
-
 # compare source and to database files to ensure they match
 all(source == db)
 all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
-
-# db[25535,1]
-# source[25535,1]
-# 
-# unique(timestamp)
-# unique(db$timestamp)
 
 #########################################################################################################################
 # #testing
@@ -174,3 +149,17 @@ which(source!=db, arr.ind=TRUE)
 # 
 # test_db[18,1]
 # test_source[18,1]
+
+# #Get test data frame
+# test_source <- tail(source)
+# test_db <- tail(db)
+
+# test_source$timestamp2 <- as.character(test_source$timestamp)
+# test_source$timestamp3 <- strptime(test_source$timestamp2, format = "%m/%d/%Y %H:%M:%S")
+# test_source$timestamp4 <- as.POSIXct(test_source$timestamp3)
+
+# issue with timestamps
+# d1727 <- subset(db,total_flow==1727 & station ==1126974)
+# s1727 <- subset(source,total_flow==1727 & station ==1126974)
+# all.equal(s1727,d1727)
+
