@@ -250,9 +250,37 @@ source18$sum_kneels <- NA
 source19$sum_kneels <- NA
 
 
+#max_load
+source02$max_load <- NA
+source03$max_load <- NA
+source04$max_load <- NA
+source05$max_load <- NA
+source06$max_load <- NA
+source07$max_load <- NA
 
+#max_load_p
+source02$max_load_p <- NA
+source03$max_load_p <- NA
+source04$max_load_p <- NA
+source05$max_load_p <- NA
+source06$max_load_p <- NA
+source07$max_load_p <- NA
+source08$max_load_p <- NA
+source09$max_load_p <- NA
+source10$max_load_p <- NA
+source11$max_load_p <- NA
+source12$max_load_p <- NA
+source13$max_load_p <- NA
+source14$max_load_p <- NA
+source15$max_load_p <- NA
 
-
+#avg_max_load
+source02$avg_max_load <- NA
+source03$avg_max_load <- NA
+source04$avg_max_load <- NA
+source05$avg_max_load <- NA
+source06$avg_max_load <- NA
+source07$avg_max_load <- NA
 
 
 
