@@ -25,16 +25,17 @@ end_time <- Sys.time()
 
 
 ### loading data ###
-#import database_data (2012-2016)
+#import database_data (2006-2010, LINENO = 1, #: 103856843)
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
-# sql_query <- getSQL("../CTPP ETL 2012-2016.sql")
-sql_query <- getSQL("C:/Users/jyen/Documents/DPOE/CTPP/2012-2016/QAQC/Query/CTPP ETL 2012-2016.sql")
-database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
+sql_query1 <- getSQL("C:/Users/jyen/Documents/DPOE/CTPP/2006-2010/QAQC/Query/CTPP ETL 2006-2010-1.sql")
+sql_query2 <- getSQL("C:/Users/jyen/Documents/DPOE/CTPP/2006-2010/QAQC/Query/CTPP ETL 2006-2010-2.sql")
+database_data1 <- sqlQuery1(channel,sql_query1,stringsAsFactors = FALSE)
+database_data2 <- sqlQuery1(channel,sql_query2,stringsAsFactors = FALSE)
 odbcClose(channel)
 
 
-#import source_data (2012-2016)
-setwd("R:/DPOE/CTPP/2012-2016/Source/Data")
+#import source_data (2006-2010)
+setwd("R:/DPOE/CTPP/2006-2010/Source/Data/")
 file_names <- dir(path = ".", pattern = ".csv") #where you have your files
 source_data <- do.call(rbind,lapply(file_names,fread)) #use data.table to batching reading large number of csv files
 source_data <- as.data.frame(source_data)
@@ -44,18 +45,26 @@ gc() #release memory
 
 ### data cleaning ###
 #remove columns from dataframes
-database_data$ctpp_id <- NULL
+database_data$SOURCE <- NULL
+database_data$TBLID <- NULL
 source_data$SOURCE <- NULL
 
 #rename dataframes headers
 names(source_data) <- colnames(database_data)
 
 #clean up est and num
-source_data$moe <- gsub("[ ,/,',',*,+,-]","", source_data$moe)
-source_data$est <- gsub("[ ,/,',',*,+,-]","", source_data$est)
+source_data$SE <- gsub("[ ,/,',',*,+,-]","", source_data$SE)
+source_data$EST <- gsub("[ ,/,',',*,+,-]","", source_data$EST)
+
+#
+save.image("G:/CTPP/2006-2010/bef_data_type_conversion.RData")
+
+
+
 
 #convert est and moe in source_data to numeric
-source_data[,4:5] <- sapply(source_data[,4:5],as.numeric) #4:est, 5:moe
+database_data[,4] <- sapply(database_data[,4],as.double)
+source_data[,3:4] <- sapply(source_data[,3:4],as.numeric)
 # gc() #release memory
 
 #sort soruce_data and database_data
@@ -80,17 +89,6 @@ all.equal(source_data, database_data) #chekc cell values and data types and will
 identical(source_data, database_data) #chekc cell values and data types
 which(source_data!=database_data, arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
-# compare files by columns (i.e., geo_id, tbl_id, line_num)
-all(source_data[1:3] == database_data[1:3]) #chekc cell values only
-all.equal(source_data[1:3], database_data[1:3]) #chekc cell values and data types and will return the conflicted cells
-identical(source_data[1:3], database_data[1:3]) #chekc cell values and data types
-which(source_data[1:3]!=database_data[1:3], arr.ind = TRUE) #which command shows exactly which columns are incorrect
-
-# compare files by columns (i.e., moe)
-all(source_data[5] == database_data[5]) #chekc cell values only
-all.equal(source_data[5], database_data[5]) #chekc cell values and data types and will return the conflicted cells
-identical(source_data[5], database_data[5]) #chekc cell values and data types
-which(source_data[5]!=database_data[5], arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
 ### display running time of R code ###
 end_time - start_time

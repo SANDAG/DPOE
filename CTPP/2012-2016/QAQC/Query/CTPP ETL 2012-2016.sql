@@ -7,43 +7,12 @@
 --ALTER TABLE [dpoe_stage].[staging].[ctpp_2016]
 --DROP COLUMN SOURCE;
 
-----Load into a new table
---IF OBJECT_ID('staging.ctpp_2012_2016', 'u') IS NULL
-----DROP TABLE staging.ctpp_2012_2016
---CREATE TABLE staging.ctpp_2012_2016
---(
---ctpp_id int identity (1,1) primary key not null
-----,yr smallint not null
-----,release_type_id nvarchar(3) not null
---,geo_id nvarchar(255) not null
---,table_id nvarchar(15) not null
---,line_number int not null
---,estimate float null
---,moe float null
---)
-----select * from staging.ctpp_2012_2016
+----Create nonclustered index
+--CREATE NONCLUSTERED INDEX ix_staging_ctpp_2016_est
+--ON dpoe_stage.staging.ctpp_2016 (est)
 
-----Load staging table
-----Remove quotes and commas from the data
---INSERT INTO staging.ctpp_2012_2016 (geo_id, table_id, line_number, estimate, moe)
-----Optimized code
---SELECT REPLACE(GEOID,'"','') as geo_id
---	,REPLACE(TBLID,'"','') as TBLID
---	,[LINENO]
---	,CASE
---		WHEN est LIKE '%^%' THEN REPLACE (est,'^',null)
---		--WHEN est LIKE '%+%' THEN REPLACE (est,'+','')
---		--WHEN est LIKE '%-%' THEN REPLACE (est,'-','')
---		ELSE REPLACE(REPLACE(REPLACE(REPLACE(est,'"',''), ',', ''), '+',''),'-','')
---	END as est
---	,CASE 
---		WHEN moe LIKE '%**%' THEN REPLACE (moe,'**',null)
---		WHEN moe LIKE '%***%' THEN REPLACE (moe,'***',null)
---		WHEN moe LIKE '%*****%' THEN REPLACE (moe,'*****',null)
---		ELSE REPLACE(REPLACE(REPLACE(moe,'"',''),'+/-',''),',','')
---	END as moe
---FROM dpoe_stage.staging.ctpp_2016
-
+--CREATE NONCLUSTERED INDEX ix_staging_ctpp_2016_moe
+--ON dpoe_stage.staging.ctpp_2016 (moe)
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -87,8 +56,6 @@
 --,tbl_desc nvarchar(255) not null
 --,universe nvarchar(255) null
 --)
-----CONSTRAINT ncix_subj_tbl_id UNIQUE (subj_tbl_id)) ON [PRIMARY]
---GO
 ----select * from dim.ctpp_subject_table
 
 ----Load table
@@ -103,15 +70,11 @@
 --INSERT INTO dim.ctpp_subject_table (yr, release_type_id, tbl_name, tbl_desc, universe)
 --SELECT '2016', '5Y', F3, F4, F5
 --FROM dbo.ctpp_subj_3 --24
-
 ----SELECT * from dim.ctpp_subject_table --173
 
 
 ----Create line number table
---SELECT *
---FROM [dpoe_stage].[dbo].[ctpp_line]
-----INNER JOIN dim.ctpp_subject_table
-----ON ctpp_subject_table.tbl_name = ctpp_line.[Table ID]
+----SELECT * FROM [dpoe_stage].[dbo].[ctpp_line]
 
 ----Clean up table
 ----Remove unneeded columns
@@ -134,8 +97,6 @@
 --,line_number smallint not null
 --,line_desc nvarchar(4000) not null
 --)
-----CONSTRAINT ncix_ctpp_line_id UNIQUE (line_id)) ON [PRIMARY]
-----GO
 ----select * from dim.ctpp_line
 
 ----Load table
@@ -183,8 +144,6 @@
 --,geoid_variables nvarchar(50) null
 --,geoid_format nvarchar(50) not null
 --)
-----CONSTRAINT ncix_ctpp_geo_id UNIQUE (geo_id)) ON [PRIMARY]
-----GO
 ----select * from dim.ctpp_geo
 
 ----Load table
@@ -200,36 +159,38 @@
 ----DROP TABLE fact.ctpp_2016
 --CREATE TABLE fact.ctpp_2016
 --(
---ctpp_id int identity (1,1) --primary key not null
+--ctpp_id int identity (1,1)
 --,geo_id nvarchar(255) not null
 --,tbl_id nvarchar(15) not null
 --,line_num int not null
 --,est float null
 --,moe float null
 --)
-----CONSTRAINT ncix_ctpp_id_2016 UNIQUE (ctpp_id)) ON [PRIMARY]
-----GO
 
-----Load data
---INSERT INTO fact.ctpp_2016 (geo_id, tbl_id, line_num, est, moe)
---SELECT geo_id, table_id, line_number, estimate, moe
---FROM staging.ctpp_2012_2016
+----Load fact table
+----Did not run this code on my local computer... used the SQL Server Agent Jobs window called "CTPP 2016" to execute the job on the server.
+--INSERT INTO fact.ctpp_2016 WITH (TABLOCK) (geo_id, tbl_id, line_num, est, moe)
+--SELECT REPLACE(GEOID,'"','') as geo_id
+--	,REPLACE(TBLID,'"','') as TBLID
+--	,[LINENO]
+--	,CASE
+--        WHEN est = '"^"' THEN REPLACE(est,'"^"',null)
+--        WHEN est LIKE '%+%' THEN REPLACE(REPLACE(REPLACE(est,'+',''),'"',''),',','')
+--        WHEN est = '"-"' THEN REPLACE(est,'"-"',null)
+--        WHEN est LIKE '%-%' THEN REPLACE(REPLACE(REPLACE(est,'-',''),'"',''),',','')
+--        ELSE REPLACE(REPLACE(est,'"',''), ',', '')
+--    END as est
+--    ,CASE
+--        WHEN moe LIKE '%**%' THEN REPLACE(moe,'**',null)
+--        WHEN moe LIKE '%***%' THEN REPLACE(moe,'***',null)
+--        WHEN moe LIKE '%*****%' THEN REPLACE(moe,'*****',null)
+--        ELSE REPLACE(REPLACE(REPLACE(moe,'"',''),'+/-',''),',','')
+--    END as moe
+--FROM dpoe_stage.staging.ctpp_2016
 ----SELECT * FROM fact.ctpp_2016
-----SELECT COUNT(*) FROM fact.ctpp_2016 --247,552,783
-SELECT * FROM fact.ctpp_2016
+
+
 ---------------------------------------------------------------------------------------------------------------------------------------------
-
---Queries for QA    
---SELECT * FROM fact.ctpp_2016
---WHERE geo_id = 'C6000US06115000014790686972' AND tbl_id = 'B306201'
---Order by line_num
-
---SELECT * FROM staging.ctpp_2016
---WHERE GEOID = '"C6000US06115000014790686972"' AND TBLID = '"B306201"'
-
---SELECT * FROM staging.ctpp_2012_2016
---WHERE geo_id = 'C6000US06115000014790686972' AND table_id = 'B306201'
-
 
 ----Create indexes
 
@@ -267,35 +228,71 @@ SELECT * FROM fact.ctpp_2016
 --GO
 
 ----Unique Constraint (UNQX, no need for primary key with this)
-----Subject Table
---ALTER TABLE [dim].[ctpp_subject_table] DROP CONSTRAINT [unqx_subj_tbl_id]
---GO
---ALTER TABLE [dim].[ctpp_subject_table]
---ADD CONSTRAINT unqx_subj_tbl_id UNIQUE (subj_tbl_id);   
---GO
-
 ----Line
---ALTER TABLE [dim].[ctpp_line] DROP CONSTRAINT [unqx_line_id]
+--ALTER TABLE [dim].[ctpp_line] 
+--DROP CONSTRAINT [unqx_line_id]
 --GO
 --ALTER TABLE [dim].[ctpp_line]
 --ADD CONSTRAINT unqx_line_id UNIQUE (line_id);   
 --GO
 
 ----Geo
---ALTER TABLE [dim].[ctpp_geo] DROP CONSTRAINT [unqx_geo_id]
+--ALTER TABLE [dim].[ctpp_geo] 
+--DROP CONSTRAINT [unqx_geo_id]
 --GO
 --ALTER TABLE [dim].[ctpp_geo]
 --ADD CONSTRAINT unqx_geo_id UNIQUE (geo_id);   
 --GO
 
+----Subject Table
+--ALTER TABLE [dim].[ctpp_subject_table] 
+--DROP CONSTRAINT [unqx_subj_tbl_id]
+--GO
+--ALTER TABLE [dim].[ctpp_subject_table]
+--ADD CONSTRAINT unqx_subj_tbl_id UNIQUE (subj_tbl_id);   
+--GO
+
 ----Fact table
---ALTER TABLE [fact].[ctpp_2016] DROP CONSTRAINT [unqx_ctpp_2016_id]
+--ALTER TABLE [fact].[ctpp_2016] 
+--DROP CONSTRAINT [unqx_ctpp_2016_id]
 --GO
 --ALTER TABLE [fact].[ctpp_2016]
 --ADD CONSTRAINT unqx_ctpp_2016_id UNIQUE (ctpp_id);   
 --GO
 
 
+---------------------------------------------------------------------------------------------------------------------------------------------
+----Troubleshooting
+----DROP TABLE IF EXISTS #temp
+----SELECT DISTINCT CASE
+----        WHEN est = '"^"' THEN REPLACE(est,'"^"',null)
+----        WHEN est LIKE '%+%' THEN REPLACE(REPLACE(REPLACE(est,'+',''),'"',''),',','')
+----        WHEN est = '"-"' THEN REPLACE(est,'"-"',null)
+----        WHEN est LIKE '%-%' THEN REPLACE(REPLACE(REPLACE(est,'-',''),'"',''),',','')
+----        ELSE REPLACE(REPLACE(est,'"',''), ',', '')
+----    END as est
+----INTO #temp_2
+----FROM dpoe_stage.staging.ctpp_2016
+
+----SELECT *
+----FROM #temp_2
+----where est LIKE ' '
+
+----SELECT DISTINCT est
+----FROM dpoe_stage.staging.ctpp_2016
+----where est = '"90+"'
+
+----SELECT DISTINCT CASE
+----        WHEN est = '"^"' THEN REPLACE (est,'"^"',null)
+----        WHEN est LIKE '%+%' THEN REPLACE (est,'+','')
+----        WHEN est = '"-"' THEN REPLACE (est,'"-"',null)
+----        WHEN est LIKE '%-%' THEN REPLACE (est,'-', '')
+----        ELSE REPLACE(REPLACE(est,'"',''), ',', '')
+----    END as est
+----FROM dpoe_stage.staging.ctpp_2016
+----WHERE try_cast(est as float) is null
+
+SELECT * FROM fact.ctpp_2016
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ----OLD
@@ -329,3 +326,35 @@ SELECT * FROM fact.ctpp_2016
 ------ORDER BY x.geo_id, x.TBLID, x.line_number
 
 ----select count(*) from staging.ctpp_2012_2016
+
+------Load data
+----INSERT INTO fact.ctpp_2016 (geo_id, tbl_id, line_num, est, moe)
+----SELECT geo_id, table_id, line_number, estimate, moe
+----FROM staging.ctpp_2012_2016
+------SELECT * FROM fact.ctpp_2016
+------SELECT COUNT(*) FROM fact.ctpp_2016 --247,552,783
+
+
+------Load into a new table
+----IF OBJECT_ID('staging.ctpp_2012_2016', 'u') IS NULL
+------DROP TABLE staging.ctpp_2012_2016
+----CREATE TABLE staging.ctpp_2012_2016
+----(
+----ctpp_id int identity (1,1) primary key not null
+------,yr smallint not null
+------,release_type_id nvarchar(3) not null
+----,geo_id nvarchar(255) not null
+----,table_id nvarchar(15) not null
+----,line_number int not null
+----,estimate float null
+----,moe float null
+----)
+------select * from staging.ctpp_2012_2016
+
+--	--,CASE
+-- --       WHEN est = '"^"' THEN REPLACE (est,'"^"',null)
+-- --       WHEN est LIKE '%+%' THEN REPLACE (est,'+','')
+-- --       WHEN est = '"-"' THEN REPLACE (est,'"-"',null)
+-- --       WHEN est LIKE '%-%' THEN REPLACE (est,'-', '')
+-- --       ELSE REPLACE(REPLACE(est,'"',''), ',', '')
+-- --   END as est
