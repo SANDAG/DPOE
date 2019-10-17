@@ -27,7 +27,7 @@ end_time <- Sys.time()
 ### loading data ###
 #import database_data (2006-2010)
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
-sql_query <- getSQL("C:/Users/jyen/Documents/DPOE/CTPP/2006-2010/QAQC/Query/CTPP ETL 2006-2010.sql") # specify the file path 
+sql_query <- 'SELECT * FROM dpoe_stage.staging.ctpp_2010' 
 database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 #save database_data to local drive
