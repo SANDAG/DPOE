@@ -494,7 +494,9 @@ source14 <- select(source14, -33)
 
 #Drop rows from source
 source02 <- source02[-1:-3,]
+source03 <- source03[-1:-3,]
 source02 <- source02[!is.na(source02$"...2"), ]
+source03 <- source03[!is.na(source03$"...1"), ]
 source03 <- source03[!is.na(source03$"...2"), ]
 source04 <- source04[!is.na(source04$"Month..Counted"), ]
 source05 <- source05[!is.na(source05$"Month..Counted"), ]
@@ -566,54 +568,36 @@ db <- plyr::rename(db, c("vintage_yr"="VINTAGE_YR","yr"="YR","date_counted"="DAT
 #Order files
 source <- source[,c("VINTAGE_YR","YR","DATE_COUNTED","ROUTE_NUM","ROUTE_NAME","SERVICE_CODE","SERVICE_TYPE","SERVICE_CLASS","SERVICE_MODE","TRIPS","TRIPS_GROSS","SUM_PASSENGERS_ON","SUM_FON","SUM_RON","SUM_PASSENGERS_OFF","SUM_FOFF","SUM_ROFF","SUM_WHEELCHAIRS","SUM_BICYCLES","SUM_KNEELS","MAX_LOAD","MAX_LOAD_P","AVG_MAX_LOAD","SUM_TP_EARLY","SUM_TP_ONTIME","SUM_TP_LATE","ONTIME","SUM_REVENUE_MILES","SUM_REVENUE_HOURS","AVG_PASSENGERS_ON","AVG_PASSENGERS_OFF","AVG_REVENUE_MILES","AVG_REVENUE_HOURS","SUM_PASSENGER_MILES","AVG_PASSENGER_MILES","SUM_SEAT_MILES","AVG_PASS_PER_MILE","AVG_PASS_PER_HOUR","AVG_SEAT_MILES","AVG_TRIP_LENGTH_MILES","PASSENGER_MILES_PER_SEAT_MILE","VEHICLE_SPEED_MPH","PASSENGER_HOURS","AVG_TRIP_LENGTH_MINUTES","PASSENGER_MILES_PER_GALLON_FUEL")]
 source <- source[order(source$VINTAGE_YR,source$YR,source$DATE_COUNTED,source$ROUTE_NUM,source$ROUTE_NAME,source$SERVICE_CODE,source$SERVICE_TYPE,source$SERVICE_CLASS,source$SERVICE_MODE,source$TRIPS,source$TRIPS_GROSS,source$SUM_PASSENGERS_ON,source$SUM_FON,source$SUM_RON,source$SUM_PASSENGERS_OFF,source$SUM_FOFF,source$SUM_ROFF,source$SUM_WHEELCHAIRS,source$SUM_BICYCLES,source$SUM_KNEELS,source$MAX_LOAD,source$MAX_LOAD_P,source$AVG_MAX_LOAD,source$SUM_TP_EARLY,source$SUM_TP_ONTIME,source$SUM_TP_LATE,source$ONTIME,source$SUM_REVENUE_MILES,source$SUM_REVENUE_HOURS,source$AVG_PASSENGERS_ON,source$AVG_PASSENGERS_OFF,source$AVG_REVENUE_MILES,source$AVG_REVENUE_HOURS,source$SUM_PASSENGER_MILES,source$AVG_PASSENGER_MILES,source$SUM_SEAT_MILES,source$AVG_PASS_PER_MILE,source$AVG_PASS_PER_HOUR,source$AVG_SEAT_MILES,source$AVG_TRIP_LENGTH_MILES,source$PASSENGER_MILES_PER_SEAT_MILE,source$VEHICLE_SPEED_MPH,source$PASSENGER_HOURS,source$AVG_TRIP_LENGTH_MINUTES,source$PASSENGER_MILES_PER_GALLON_FUEL),]
-db <- db[order(db$VINTAGE_YR, db$YR,db$DATE_COUNTED,db$ROUTE_NUM,db$ROUTE_NAME,db$SERVICE_CODE,db$SERVICE_TYPE,db$SERVICE_CLASS,db$SERVICE_MODE,db$TRIPS,db$TRIPS_GROSS,db$SUM_PASSENGERS_ON,db$SUM_FON,db$SUM_RON,db$SUM_PASSENGERS_OFF,db$SUM_FOFF,db$SUM_ROFF,db$SUM_WHEELCHAIRS,db$SUM_BICYCLES,db$SUM_KNEELS,db$MAX_LOAD,db$MAX_LOAD_P,db$AVG_MAX_LOAD,db$SUM_TP_EARLY,db$SUM_TP_ONTIME,db$SUM_TP_LATE,db$ONTIME,db$SUM_REVENUE_MILES,db$SUM_REVENUE_HOURS,db$AVG_PASSENGERS_ON,db$AVG_PASSENGERS_OFF,db$AVG_REVENUE_MILES,db$AVG_REVENUE_HOURS,db$SUM_PASSENGER_MILES,db$AVG_PASSENGER_MILES,db$SUM_SEAT_MILES,db$AVG_PASS_PER_MILE,db$AVG_PASS_PER_HOUR,db$AVG_SEAT_MILES,db$AVG_TRIP_LENGTH_MILES,db$PASSENGER_MILES_PER_SEAT_MILE,db$VEHICLE_SPEED_MPH,db$PASSENGER_HOURS,db$AVG_TRIP_LENGTH_MINUTES,db$PASSENGER_MILES_PER_GALLON_FUEL),]
+db <- db[order(db$VINTAGE_YR,db$YR,db$DATE_COUNTED,db$ROUTE_NUM,db$ROUTE_NAME,db$SERVICE_CODE,db$SERVICE_TYPE,db$SERVICE_CLASS,db$SERVICE_MODE,db$TRIPS,db$TRIPS_GROSS,db$SUM_PASSENGERS_ON,db$SUM_FON,db$SUM_RON,db$SUM_PASSENGERS_OFF,db$SUM_FOFF,db$SUM_ROFF,db$SUM_WHEELCHAIRS,db$SUM_BICYCLES,db$SUM_KNEELS,db$MAX_LOAD,db$MAX_LOAD_P,db$AVG_MAX_LOAD,db$SUM_TP_EARLY,db$SUM_TP_ONTIME,db$SUM_TP_LATE,db$ONTIME,db$SUM_REVENUE_MILES,db$SUM_REVENUE_HOURS,db$AVG_PASSENGERS_ON,db$AVG_PASSENGERS_OFF,db$AVG_REVENUE_MILES,db$AVG_REVENUE_HOURS,db$SUM_PASSENGER_MILES,db$AVG_PASSENGER_MILES,db$SUM_SEAT_MILES,db$AVG_PASS_PER_MILE,db$AVG_PASS_PER_HOUR,db$AVG_SEAT_MILES,db$AVG_TRIP_LENGTH_MILES,db$PASSENGER_MILES_PER_SEAT_MILE,db$VEHICLE_SPEED_MPH,db$PASSENGER_HOURS,db$AVG_TRIP_LENGTH_MINUTES,db$PASSENGER_MILES_PER_GALLON_FUEL),]
 
 #Check data types
 str(source)
 str(db)
+all.equal(str(source),str(db))
 
 #Convert data types
 source$VINTAGE_YR <- as.integer(source$VINTAGE_YR)
 source$YR <- as.integer(source$YR)
-#source$DATE_COUNTED <- as.character(source$DATE_COUNTED)
+
+#date doesnt work yet
+source$DATE_COUNTED_test <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
+
 source$ROUTE_NUM <- as.numeric(source$ROUTE_NUM)
-#source$ROUTE_NAME <- as.character(source$ROUTE_NAME)
-# source$SERVICE_CODE <- as.character(source$SERVICE_CODE)
-# source$SERVICE_TYPE <- as.character(source$SERVICE_TYPE)
-# source$SERVICE_CLASS <- as.character(source$SERVICE_CLASS)
-# source$SERVICE_MODE <- as.character(source$SERVICE_MODE)
 source$TRIPS <- as.integer(source$TRIPS)
 source$TRIPS_GROSS <- as.integer(source$TRIPS_GROSS)
 source$SUM_PASSENGERS_ON <- as.numeric(source$SUM_PASSENGERS_ON)
 source$SUM_FON <- as.integer(source$SUM_FON)
 source$SUM_RON <- as.integer(source$SUM_RON)
-#source$SUM_PASSENGERS_OFF <- as.numeric(source$SUM_PASSENGERS_OFF)
 source$SUM_FOFF <- as.integer(source$SUM_FOFF)
 source$SUM_ROFF <- as.integer(source$SUM_ROFF)
 source$SUM_WHEELCHAIRS <- as.integer(source$SUM_WHEELCHAIRS)
 source$SUM_BICYCLES <- as.integer(source$SUM_BICYCLES)
 source$SUM_KNEELS <- as.integer(source$SUM_KNEELS)
-# source$MAX_LOAD <- as.numeric(source$MAX_LOAD)
-# source$MAX_LOAD_P <- as.numeric(source$MAX_LOAD_P)
-# source$AVG_MAX_LOAD <- as.numeric(source$AVG_MAX_LOAD)
-# source$SUM_TP_EARLY <- as.numeric(source$SUM_TP_EARLY)
-# source$SUM_TP_ONTIME <- as.numeric(source$SUM_TP_ONTIME)
-# source$SUM_TP_LATE <- as.numeric(source$SUM_TP_LATE)
-# source$ONTIME <- as.numeric(source$ONTIME)
 source$SUM_REVENUE_MILES <- as.numeric(source$SUM_REVENUE_MILES)
 source$SUM_REVENUE_HOURS <- as.numeric(source$SUM_REVENUE_HOURS)
-# source$AVG_PASSENGERS_ON <- as.numeric(source$AVG_PASSENGERS_ON)
-# source$AVG_PASSENGERS_OFF <- as.numeric(source$AVG_PASSENGERS_OFF)
-# source$AVG_REVENUE_MILES <- as.numeric(source$AVG_REVENUE_MILES)
-# source$AVG_REVENUE_HOURS <- as.numeric(source$AVG_REVENUE_HOURS)
-#source$SUM_PASSENGER_MILES <- as.numeric(source$SUM_PASSENGER_MILES)
-# source$AVG_PASSENGER_MILES <- as.numeric(source$AVG_PASSENGER_MILES)
-# source$SUM_SEAT_MILES <- as.numeric(source$SUM_SEAT_MILES)
 source$AVG_PASS_PER_MILE <- as.numeric(source$AVG_PASS_PER_MILE)
 source$AVG_PASS_PER_HOUR <- as.numeric(source$AVG_PASS_PER_HOUR)
-# source$AVG_SEAT_MILES <- as.numeric(source$AVG_SEAT_MILES)
 source$AVG_TRIP_LENGTH_MILES <- as.numeric(source$AVG_TRIP_LENGTH_MILES)
-#source$PASSENGER_MILES_PER_SEAT_MILE <- as.numeric(source$PASSENGER_MILES_PER_SEAT_MILE)
 source$VEHICLE_SPEED_MPH <- as.numeric(source$VEHICLE_SPEED_MPH)
 source$PASSENGER_HOURS <- as.numeric(source$PASSENGER_HOURS)
 source$AVG_TRIP_LENGTH_MINUTES <- as.numeric(source$AVG_TRIP_LENGTH_MINUTES)
@@ -628,4 +612,7 @@ all(source == db)
 all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
+
+# db[183,1:4]
+# source[183,1:4]
 
