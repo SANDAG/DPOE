@@ -578,10 +578,7 @@ all.equal(str(source),str(db))
 #Convert data types
 source$VINTAGE_YR <- as.integer(source$VINTAGE_YR)
 source$YR <- as.integer(source$YR)
-
-#date doesnt work yet
 source$DATE_COUNTED_test <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
-
 source$ROUTE_NUM <- as.numeric(source$ROUTE_NUM)
 source$TRIPS <- as.integer(source$TRIPS)
 source$TRIPS_GROSS <- as.integer(source$TRIPS_GROSS)
