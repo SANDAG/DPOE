@@ -9,7 +9,7 @@ source("..\\..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
 #Read in source and database files
-source_data <- read.delim("R:\\DPOE\\CA DOE\\CALPADS\\Source\\cohort1617.txt")
+source_data <- read.delim("R:\\DPOE\\CALPADS\\Source\\cohort1617.txt")
 
 #Read in SQL data 
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
