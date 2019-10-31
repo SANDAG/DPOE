@@ -8,5 +8,5 @@ pkgTest <- function(pkg){
   
 }
 packages <- c("data.table", "ggplot2", "scales", "sqldf", "rstudioapi", "RODBC", "reshape2", 
-              "stringr","tidyverse", "plyr", "readxl", "readr", "reshape")
+              "stringr","tidyverse", "plyr", "readxl", "readr", "reshape", "sqlutils")
 pkgTest(packages)
