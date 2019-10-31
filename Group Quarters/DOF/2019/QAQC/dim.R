@@ -1,20 +1,13 @@
 # file comparison code between a xls source file and raw upload SQL Table
 
-#Reading in packages
-pkgTest <- function(pkg){
-  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg))
-    install.packages(new.pkg, dep = TRUE)
-  sapply(pkg, require, character.only = TRUE)
- }
-packages <- c("data.table", "ggplot2", "scales", "sqldf", "rstudioapi", "RODBC", "reshape2", 
-              "stringr","tidyverse", "plyr", "readxl", "readr", "reshape")
-pkgTest(packages)
+#set working directory and access code to read in SQL queries
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+source("..\\..\\..\\..\\Common_functions\\Loading_in_packages.R")
+source("..\\..\\..\\..\\Common_functions\\readSQL.R")
+getwd()
 
 ####Obtain Source Data####
-# Source data, make sure to use double backslashes for the file path
 file <- "R:\\DPOE\\DOF Group Quarters\\2019\\QAQC\\Raw\\dim.xlsx"
-#Source_data <- read.xlsx(file, sheetIndex = 1, header = TRUE) #header doesn't work
 Source_data <- read_excel(file, sheet = 1)
 
 #Check data type
@@ -31,10 +24,9 @@ names(Source_data) <- c("facility_name","facility_type",
                         "facility_owner","jurisdiction","placecode")
 
 ####Obtain SQL Database Data####
-# SQL data
-source("R:/DPOE/DOF Group Quarters/2019/QAQC/readSQL.R")
-sql_query = getSQL("R:/DPOE/DOF Group Quarters/2019/QAQC/SQL Query/dim.sql")
+options(stringsAsFactors=FALSE)
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
+sql_query <- 'select facility_name, facility_type, facility_owner, jurisdiction, placecode from dim.facility'
 database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 
