@@ -9,7 +9,7 @@ getwd()
 # file comparison code between a CSV source file and raw upload SQL Table
 
 #Read in source and database files
-source_data <- read_excel("R:\\DPOE\\C2ER Cost of Living Index\\2019\\Historical\\Source\\COLI Historical Data - 1990 Q1 - 2019 Q1.xlsx",guess_max = 40000)
+source_data <- read_excel("R:\\DPOE\\Cost of Living Index\\C2ER\\2019\\Historical\\Source\\COLI Historical Data - 1990 Q1 - 2019 Q1.xlsx",guess_max = 40000)
 
 #Read in SQL data 
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
