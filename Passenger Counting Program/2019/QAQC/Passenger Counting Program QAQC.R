@@ -6,6 +6,9 @@ source("..\\..\\..\\Common_functions\\Loading_in_packages.R")
 source("..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
 
+# display more digits
+options(digits=20)
+
 #Read in source files
 source02 <- read_excel("R:\\DPOE\\Passenger Counting Program\\2019\\Source\\FY2002 - 2019 Weekday Ridership by Route rev. 9.20.19.xlsx", sheet = "2002")
 source03 <- read_excel("R:\\DPOE\\Passenger Counting Program\\2019\\Source\\FY2002 - 2019 Weekday Ridership by Route rev. 9.20.19.xlsx", sheet = "2003")
@@ -613,6 +616,28 @@ source$PASSENGER_HOURS <- as.numeric(source$PASSENGER_HOURS)
 source$AVG_TRIP_LENGTH_MINUTES <- as.numeric(source$AVG_TRIP_LENGTH_MINUTES)
 source$PASSENGER_MILES_PER_GALLON_FUEL <- as.numeric(source$PASSENGER_MILES_PER_GALLON_FUEL)
 
+#Round digits to 10th decimal place
+source$AVG_PASS_PER_MILE <- round(source$AVG_PASS_PER_MILE,10)
+db$AVG_PASS_PER_MILE <- round(db$AVG_PASS_PER_MILE,10)
+
+source$AVG_PASS_PER_HOUR <- round(source$AVG_PASS_PER_HOUR,10)
+db$AVG_PASS_PER_HOUR <- round(db$AVG_PASS_PER_HOUR,10)
+
+source$AVG_TRIP_LENGTH_MILES <- round(source$AVG_TRIP_LENGTH_MILES,9)
+db$AVG_TRIP_LENGTH_MILES <- round(db$AVG_TRIP_LENGTH_MILES,9)
+
+source$VEHICLE_SPEED_MPH <- round(source$VEHICLE_SPEED_MPH,10)
+db$VEHICLE_SPEED_MPH <- round(db$VEHICLE_SPEED_MPH,10)
+
+source$PASSENGER_HOURS <- round(source$PASSENGER_HOURS,9)
+db$PASSENGER_HOURS <- round(db$PASSENGER_HOURS,9)
+
+source$AVG_TRIP_LENGTH_MINUTES <- round(source$AVG_TRIP_LENGTH_MINUTES,10)
+db$AVG_TRIP_LENGTH_MINUTES <- round(db$AVG_TRIP_LENGTH_MINUTES,10)
+
+source$PASSENGER_MILES_PER_GALLON_FUEL <- round(source$PASSENGER_MILES_PER_GALLON_FUEL,10)
+db$PASSENGER_MILES_PER_GALLON_FUEL <- round(db$PASSENGER_MILES_PER_GALLON_FUEL,10)
+
 #delete rownames for checking files match
 rownames(source) <- NULL
 rownames(db) <- NULL
@@ -655,14 +680,7 @@ all.equal(source_wo,db_wo)
 identical(source_wo,db_wo)
 which(source_wo!=db_wo, arr.ind=TRUE)
 
-db_wo[318,37]
-source_wo[318,37]
-identical(db_wo[443,37],source_wo[443,37])
+# db_wo[1495,40]
+# source_wo[1495,40]
+# all.equal(db_wo[443,37],source_wo[443,37])
 
-str(source_wo)
-str(db_wo)
-
-colnames(source_wo)
-unique(source_wo$AVG_PASS_PER_MILE)
-unique(db_wo$AVG_PASS_PER_MILE)
-which(source_wo$AVG_PASS_PER_MILE!=db_wo$AVG_PASS_PER_MILE, arr.ind=TRUE)
