@@ -60,6 +60,7 @@ str(db)
 
 #Convert data types
 source$ADDRESS <- as.character(source$ADDRESS)
+source$MAKE <- as.character(source$MAKE)
 source$SERIES <- as.character(source$SERIES)
 source$MODEL <- as.character(source$MODEL)
 source$FUEL <- as.character(source$FUEL)
@@ -80,5 +81,22 @@ all.equal(source,db) #check cell values and data types and will return the confl
 identical(source,db) #check cell values and data types
 which(source!=db, arr.ind = TRUE)
 
-source[9194888,4]
-db[9194888,4]
+#Delete individual data frames
+rm(db2010,db2011,db2012,db2013,db2014,db2015,db2016,db2017,db2018)
+rm(source2010,source2011,source2012,source2013,source2014,source2015,source2016,source2017,source2018)
+
+# source[9194888,4]
+# db[9194888,4]
+
+########################################################################################################################################################
+
+#Check source file to final database upload
+
+#Load fact table
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
+sql_query <- 'SELECT * FROM [dpoe_stage].[fact].[dmv_vehicle_reg]'          
+fact <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
+odbcClose(channel)
+
+
+
