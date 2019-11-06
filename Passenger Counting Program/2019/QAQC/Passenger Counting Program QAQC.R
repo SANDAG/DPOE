@@ -572,7 +572,9 @@ source <- source[order(source$VINTAGE_YR,source$YR,source$DATE_COUNTED,source$RO
 db <- db[order(db$VINTAGE_YR,db$YR,db$DATE_COUNTED,db$ROUTE_NUM,db$ROUTE_NAME,db$SERVICE_CODE,db$SERVICE_TYPE,db$SERVICE_CLASS,db$SERVICE_MODE,db$TRIPS,db$TRIPS_GROSS,db$SUM_PASSENGERS_ON,db$SUM_FON,db$SUM_RON,db$SUM_PASSENGERS_OFF,db$SUM_FOFF,db$SUM_ROFF,db$SUM_WHEELCHAIRS,db$SUM_BICYCLES,db$SUM_KNEELS,db$MAX_LOAD,db$MAX_LOAD_P,db$AVG_MAX_LOAD,db$SUM_TP_EARLY,db$SUM_TP_ONTIME,db$SUM_TP_LATE,db$ONTIME,db$SUM_REVENUE_MILES,db$SUM_REVENUE_HOURS,db$AVG_PASSENGERS_ON,db$AVG_PASSENGERS_OFF,db$AVG_REVENUE_MILES,db$AVG_REVENUE_HOURS,db$SUM_PASSENGER_MILES,db$AVG_PASSENGER_MILES,db$SUM_SEAT_MILES,db$AVG_PASS_PER_MILE,db$AVG_PASS_PER_HOUR,db$AVG_SEAT_MILES,db$AVG_TRIP_LENGTH_MILES,db$PASSENGER_MILES_PER_SEAT_MILE,db$VEHICLE_SPEED_MPH,db$PASSENGER_HOURS,db$AVG_TRIP_LENGTH_MINUTES,db$PASSENGER_MILES_PER_GALLON_FUEL),]
 
 #Replace route names with route numbers in ROUTE_NUM column
+source$ROUTE_NUM[source$ROUTE_NUM == "Coaster*"] <- "398"
 source$ROUTE_NUM[source$ROUTE_NUM == "Coaster"] <- "398"
+source$ROUTE_NUM[source$ROUTE_NUM == "COASTER"] <- "398"
 source$ROUTE_NUM[source$ROUTE_NUM == "Blue Line"] <- "510"
 source$ROUTE_NUM[source$ROUTE_NUM == "Orange Line"] <- "520"
 source$ROUTE_NUM[source$ROUTE_NUM == "Green Line"] <- "530"
@@ -613,10 +615,10 @@ rownames(source) <- NULL
 rownames(db) <- NULL
 
 # compare source to database files to ensure they match
-all(source == db)
-all.equal(source,db)
-identical(source,db)
-which(source!=db, arr.ind=TRUE)
+# all(source == db)
+# all.equal(source,db)
+# identical(source,db)
+# which(source!=db, arr.ind=TRUE)
 
 
 
@@ -624,16 +626,27 @@ which(source!=db, arr.ind=TRUE)
 
 
 #####testing ###########
-db[806,3]
-source[806,3]
+# db[806,3]
+# source[806,3]
 
-myvars <- c("YR","DATE_COUNTED","DATE_COUNTED_TEST","ROUTE_NUM","ROUTE_NAME")
-source_test <- source[myvars]
-source_test <- source_test[order(source_test$YR,source_test$DATE_COUNTED,source_test$ROUTE_NUM,source_test$ROUTE_NAME),]
+# myvars <- c("YR","DATE_COUNTED","DATE_COUNTED_TEST","ROUTE_NUM","ROUTE_NAME")
+# source_test <- source[myvars]
+# source_test <- source_test[order(source_test$YR,source_test$DATE_COUNTED,source_test$ROUTE_NUM,source_test$ROUTE_NAME),]
 
 #Create subset without 2004-2006 data
 source_wo <- subset(source, YR != 2004 & YR != 2005 & YR != 2006)
 db_wo <- subset(db, YR != 2004 & YR != 2005 & YR != 2006)
+
+#Find column names
+# colnames(source_wo)
+
+#Trim whitespace
+source$AVG_PASS_PER_MILE <- trimws(source$AVG_PASS_PER_MILE)
+db$AVG_PASS_PER_MILE <- trimws(db$AVG_PASS_PER_MILE)
+source$AVG_PASS_PER_HOUR <- trimws(source$AVG_PASS_PER_HOUR)
+db$AVG_PASS_PER_HOUR <- trimws(db$AVG_PASS_PER_HOUR)
+source$AVG_TRIP_LENGTH_MILES <- trimws(source$AVG_TRIP_LENGTH_MILES)
+db$AVG_TRIP_LENGTH_MILES <- trimws(db$AVG_TRIP_LENGTH_MILES)
 
 #Order files
 source_wo <- source_wo[order(source_wo$VINTAGE_YR,source_wo$YR,source_wo$DATE_COUNTED,source_wo$ROUTE_NUM,source_wo$ROUTE_NAME,source_wo$SERVICE_CODE,source_wo$SERVICE_TYPE,source_wo$SERVICE_CLASS,source_wo$SERVICE_MODE,source_wo$TRIPS,source_wo$TRIPS_GROSS,source_wo$SUM_PASSENGERS_ON,source_wo$SUM_FON,source_wo$SUM_RON,source_wo$SUM_PASSENGERS_OFF,source_wo$SUM_FOFF,source_wo$SUM_ROFF,source_wo$SUM_WHEELCHAIRS,source_wo$SUM_BICYCLES,source_wo$SUM_KNEELS,source_wo$MAX_LOAD,source_wo$MAX_LOAD_P,source_wo$AVG_MAX_LOAD,source_wo$SUM_TP_EARLY,source_wo$SUM_TP_ONTIME,source_wo$SUM_TP_LATE,source_wo$ONTIME,source_wo$SUM_REVENUE_MILES,source_wo$SUM_REVENUE_HOURS,source_wo$AVG_PASSENGERS_ON,source_wo$AVG_PASSENGERS_OFF,source_wo$AVG_REVENUE_MILES,source_wo$AVG_REVENUE_HOURS,source_wo$SUM_PASSENGER_MILES,source_wo$AVG_PASSENGER_MILES,source_wo$SUM_SEAT_MILES,source_wo$AVG_PASS_PER_MILE,source_wo$AVG_PASS_PER_HOUR,source_wo$AVG_SEAT_MILES,source_wo$AVG_TRIP_LENGTH_MILES,source_wo$PASSENGER_MILES_PER_SEAT_MILE,source_wo$VEHICLE_SPEED_MPH,source_wo$PASSENGER_HOURS,source_wo$AVG_TRIP_LENGTH_MINUTES,source_wo$PASSENGER_MILES_PER_GALLON_FUEL),]
@@ -648,5 +661,8 @@ all.equal(source_wo,db_wo)
 identical(source_wo,db_wo)
 which(source_wo!=db_wo, arr.ind=TRUE)
 
-db[806,3]
-source_wo[806,3]
+db_wo[443,37]
+source_wo[443,37]
+identical(db_wo[443,37],source_wo[443,37])
+
+all(unique(source$AVG_PASS_PER_MILE) == unique(db$AVG_PASS_PER_MILE))
