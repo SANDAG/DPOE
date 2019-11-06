@@ -3,17 +3,79 @@ maindir = dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(maindir)
 
 # import functions
+<<<<<<< HEAD
+install.packages("here")
+library(here)
+source(here("Common_functions","readSQL.R"))
+source(here("Common_functions","common_functions.R"))
+source(here("Common_functions","config.R"))
+
+# import packages
+packages <- c("RODBC","tidyverse","openxlsx","hash","plyr","devtools", "data.table")
+=======
 source("config.R")
 source("../readSQL.R")
 source("common_functions.R")
 
 # import packages
 packages <- c("RODBC","tidyverse","openxlsx","hash","plyr")
+>>>>>>> 030e083d0ea5c14b7a5e58a51ded6fd74b414a68
 pkgTest(packages)
 
 # initialize start time
 sleep_for_a_minute <- function() { Sys.sleep(60) }
 start_time <- Sys.time()
+<<<<<<< HEAD
+
+
+#Import Database Data
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=socioec_data_stage; trusted_connection=true')
+sql_query <- getSQL("../Queries/import_lodes74_rac.sql")
+database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
+odbcClose(channel)
+save.image(file = 'database_data', "C:/database_data.RData")
+gc() #release memory
+
+#Import Source Data
+setwd("R:/DPOE/LEHD LODES/7.4/Source/RAC")
+file_names <- dir(path = ".", pattern = ".csv") #where you have your files
+source_data <- do.call(rbind,lapply(file_names,fread)) #use data.table to batching reading large number of csv files
+source_data <- as.data.frame(source_data)
+gc() #release memory
+
+
+save.image(database_data, "C:/database_data.RData")
+save.image(source_data, "C:/source_data.RData")
+
+
+
+
+
+# #########Clean Database Data#########
+# # remove unnecessary columns from databased_data
+# database_data$createdate <- NULL
+# database_data$type <- NULL
+# database_data$segment <- NULL
+# database_data$yr <- NULL
+# 
+# # convert w_geoid of database_data to character type
+# database_data[,1] <- sapply(database_data[,1],as.character)
+# gc() #release memory
+
+-----------------------------------------------------------------------
+
+#Import Source Data
+setwd("R:/DPOE/LEHD LODES/7.4/Source/RAC")
+file_names <- dir(path = ".", pattern = ".csv") #where you have your files
+source_data <- do.call(rbind,lapply(file_names,fread)) #use data.table to batching reading large number of csv files
+source_data <- as.data.frame(source_data)
+# save.image(source_data, "C:/ctpp_source_data.RData")
+gc() #release memory
+  
+  
+  
+  
+=======
 sleep_for_a_minute()
 end_time <- Sys.time()
 
@@ -74,6 +136,7 @@ gc() #release memory
 # merge all partitions
 source_data <- rbind(small_data, medium_data, sizeover20, sizeover30)
 gc() #release memory
+>>>>>>> 030e083d0ea5c14b7a5e58a51ded6fd74b414a68
 
 #########Clean Source Data#########
 # remove "createdate" from source_data

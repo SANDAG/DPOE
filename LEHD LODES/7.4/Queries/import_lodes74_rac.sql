@@ -1,0 +1,1 @@
+SELECT * FROM [socioec_data_stage].[lehd_lodes].[rac]
