@@ -271,11 +271,6 @@ source07$SUM_BICYCLES <- NA
 source08$SUM_BICYCLES <- NA
 source09$SUM_BICYCLES <- NA
 source10$SUM_BICYCLES <- NA
-source11$SUM_BICYCLES <- NA
-source12$SUM_BICYCLES <- NA
-source13$SUM_BICYCLES <- NA
-source14$SUM_BICYCLES <- NA
-source15$SUM_BICYCLES <- NA
 
 #SUM_KNEELS
 source02$SUM_KNEELS <- NA
@@ -600,10 +595,7 @@ source$YR <- as.integer(source$YR)
 source$DATE_COUNTED <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
 
 #Replace route_name na's with Encinitas Coaster COnnection where DATE_COUNTED = "2002-06-02"
-if (is.na(source$ROUTE_NUM) == TRUE & source$DATE_COUNTED == "2002-06-02"){
-  source$ROUTE_NAME = "Encinitas Coaster Connection"
-}
-
+source[83,5] <- "Encinitas Coaster Connection"
 unique(source$ROUTE_NAME)
 
 #Convert data types
@@ -669,14 +661,6 @@ rownames(db) <- NULL
 source_wo <- subset(source, YR != 2004 & YR != 2005 & YR != 2006)
 db_wo <- subset(db, YR != 2004 & YR != 2005 & YR != 2006)
 
-#Trim whitespace
-# source$AVG_PASS_PER_MILE <- trimws(source$AVG_PASS_PER_MILE)
-# db$AVG_PASS_PER_MILE <- trimws(db$AVG_PASS_PER_MILE)
-# source$AVG_PASS_PER_HOUR <- trimws(source$AVG_PASS_PER_HOUR)
-# db$AVG_PASS_PER_HOUR <- trimws(db$AVG_PASS_PER_HOUR)
-# source$AVG_TRIP_LENGTH_MILES <- trimws(source$AVG_TRIP_LENGTH_MILES)
-# db$AVG_TRIP_LENGTH_MILES <- trimws(db$AVG_TRIP_LENGTH_MILES)
-
 #Order files
 # source_wo <- source_wo[order(source_wo$VINTAGE_YR,source_wo$YR,source_wo$DATE_COUNTED,source_wo$ROUTE_NUM,source_wo$ROUTE_NAME,source_wo$SERVICE_CODE,source_wo$SERVICE_TYPE,source_wo$SERVICE_CLASS,source_wo$SERVICE_MODE,source_wo$TRIPS,source_wo$TRIPS_GROSS,source_wo$SUM_PASSENGERS_ON,source_wo$SUM_FON,source_wo$SUM_RON,source_wo$SUM_PASSENGERS_OFF,source_wo$SUM_FOFF,source_wo$SUM_ROFF,source_wo$SUM_WHEELCHAIRS,source_wo$SUM_BICYCLES,source_wo$SUM_KNEELS,source_wo$MAX_LOAD,source_wo$MAX_LOAD_P,source_wo$AVG_MAX_LOAD,source_wo$SUM_TP_EARLY,source_wo$SUM_TP_ONTIME,source_wo$SUM_TP_LATE,source_wo$ONTIME,source_wo$SUM_REVENUE_MILES,source_wo$SUM_REVENUE_HOURS,source_wo$AVG_PASSENGERS_ON,source_wo$AVG_PASSENGERS_OFF,source_wo$AVG_REVENUE_MILES,source_wo$AVG_REVENUE_HOURS,source_wo$SUM_PASSENGER_MILES,source_wo$AVG_PASSENGER_MILES,source_wo$SUM_SEAT_MILES,source_wo$AVG_PASS_PER_MILE,source_wo$AVG_PASS_PER_HOUR,source_wo$AVG_SEAT_MILES,source_wo$AVG_TRIP_LENGTH_MILES,source_wo$PASSENGER_MILES_PER_SEAT_MILE,source_wo$VEHICLE_SPEED_MPH,source_wo$PASSENGER_HOURS,source_wo$AVG_TRIP_LENGTH_MINUTES,source_wo$PASSENGER_MILES_PER_GALLON_FUEL),]
 # db_wo <- db_wo[order(db_wo$VINTAGE_YR,db_wo$YR,db_wo$DATE_COUNTED,db_wo$ROUTE_NUM,db_wo$ROUTE_NAME,db_wo$SERVICE_CODE,db_wo$SERVICE_TYPE,db_wo$SERVICE_CLASS,db_wo$SERVICE_MODE,db_wo$TRIPS,db_wo$TRIPS_GROSS,db_wo$SUM_PASSENGERS_ON,db_wo$SUM_FON,db_wo$SUM_RON,db_wo$SUM_PASSENGERS_OFF,db_wo$SUM_FOFF,db_wo$SUM_ROFF,db_wo$SUM_WHEELCHAIRS,db_wo$SUM_BICYCLES,db_wo$SUM_KNEELS,db_wo$MAX_LOAD,db_wo$MAX_LOAD_P,db_wo$AVG_MAX_LOAD,db_wo$SUM_TP_EARLY,db_wo$SUM_TP_ONTIME,db_wo$SUM_TP_LATE,db_wo$ONTIME,db_wo$SUM_REVENUE_MILES,db_wo$SUM_REVENUE_HOURS,db_wo$AVG_PASSENGERS_ON,db_wo$AVG_PASSENGERS_OFF,db_wo$AVG_REVENUE_MILES,db_wo$AVG_REVENUE_HOURS,db_wo$SUM_PASSENGER_MILES,db_wo$AVG_PASSENGER_MILES,db_wo$SUM_SEAT_MILES,db_wo$AVG_PASS_PER_MILE,db_wo$AVG_PASS_PER_HOUR,db_wo$AVG_SEAT_MILES,db_wo$AVG_TRIP_LENGTH_MILES,db_wo$PASSENGER_MILES_PER_SEAT_MILE,db_wo$VEHICLE_SPEED_MPH,db_wo$PASSENGER_HOURS,db_wo$AVG_TRIP_LENGTH_MINUTES,db_wo$PASSENGER_MILES_PER_GALLON_FUEL),]
@@ -689,10 +673,15 @@ rownames(db_wo) <- NULL
 
 all(source_wo == db_wo)
 all.equal(source_wo,db_wo)
+all.equal(source_wo,db_wo, check.attributes=FALSE)
 identical(source_wo,db_wo)
 which(source_wo!=db_wo, arr.ind=TRUE)
 
-db_wo[1,4]
-source_wo[1,4]
+mode(attr(source, "DATE_COUNTED"))
+
+
+
+db_wo[467,43]
+source_wo[467,43]
 # all.equal(db_wo[443,37],source_wo[443,37])
 
