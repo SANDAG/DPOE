@@ -586,15 +586,27 @@ source$ROUTE_NUM[source$ROUTE_NUM == "Green Line"] <- "530"
 source$ROUTE_NUM[source$ROUTE_NUM == "Encinitas Coaster Connection"] <- NA
 source$DATE_COUNTED[source$DATE_COUNTED == "Spring 2007"] <- NA
 
+source$ROUTE_NAME[is.na(source$ROUTE_NAME) & source$DATE_COUNTED == "2002-06-02" ] <- "Encinitas Coaster Connection"
+
+
 #Check data types
-str(source)
-str(db)
-all.equal(str(source),str(db))
+# str(source)
+# str(db)
+# all.equal(str(source),str(db))
 
 #Convert data types
 source$VINTAGE_YR <- as.integer(source$VINTAGE_YR)
 source$YR <- as.integer(source$YR)
 source$DATE_COUNTED <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
+
+#Replace route_name na's with Encinitas Coaster COnnection where DATE_COUNTED = "2002-06-02"
+if (is.na(source$ROUTE_NUM) == TRUE & source$DATE_COUNTED == "2002-06-02"){
+  source$ROUTE_NAME = "Encinitas Coaster Connection"
+}
+
+unique(source$ROUTE_NAME)
+
+#Convert data types
 source$ROUTE_NUM <- as.numeric(source$ROUTE_NUM)
 source$TRIPS <- as.integer(source$TRIPS)
 source$TRIPS_GROSS <- as.integer(source$TRIPS_GROSS)
@@ -680,7 +692,7 @@ all.equal(source_wo,db_wo)
 identical(source_wo,db_wo)
 which(source_wo!=db_wo, arr.ind=TRUE)
 
-# db_wo[1495,40]
-# source_wo[1495,40]
+db_wo[1,4]
+source_wo[1,4]
 # all.equal(db_wo[443,37],source_wo[443,37])
 
