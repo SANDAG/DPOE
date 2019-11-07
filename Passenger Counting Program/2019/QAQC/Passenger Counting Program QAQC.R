@@ -5,6 +5,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("..\\..\\..\\Common_functions\\Loading_in_packages.R")
 source("..\\..\\..\\Common_functions\\readSQL.R")
 getwd()
+library(anytime)
 
 # display more digits
 options(digits=20)
@@ -37,26 +38,6 @@ channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dp
 sql_query <- 'SELECT * FROM dpoe_stage.staging.passenger_counting_program'
 db <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
-
-#Check data types
-# str(source02)
-# str(source03)
-# str(source04)
-# str(source05)
-# str(source06)
-# str(source07)
-# str(source08)
-# str(source09)
-# str(source10)
-# str(source11)
-# str(source12)
-# str(source13)
-# str(source14)
-# str(source15)
-# str(source16)
-# str(source17)
-# str(source18)
-# str(source19)
 
 #Convert to data frame
 source02 <- as.data.frame(source02)
@@ -542,6 +523,13 @@ source$VINTAGE_YR <- "2019"
 #Rename files
 db <- plyr::rename(db, c("vintage_yr"="VINTAGE_YR","yr"="YR","date_counted"="DATE_COUNTED","route_num"="ROUTE_NUM","route_name"="ROUTE_NAME","service_code"="SERVICE_CODE","service_type"="SERVICE_TYPE","service_class"="SERVICE_CLASS","service_mode"="SERVICE_MODE","trips"="TRIPS","trips_gross"="TRIPS_GROSS","sum_passengers_on"="SUM_PASSENGERS_ON","sum_fon"="SUM_FON","sum_ron"="SUM_RON","sum_passengers_off"="SUM_PASSENGERS_OFF","sum_foff"="SUM_FOFF","sum_roff"="SUM_ROFF","sum_wheelchairs"="SUM_WHEELCHAIRS","sum_bicycles"="SUM_BICYCLES","sum_kneels"="SUM_KNEELS","max_load"="MAX_LOAD","max_load_p"="MAX_LOAD_P","avg_max_load"="AVG_MAX_LOAD","sum_tp_early"="SUM_TP_EARLY","sum_tp_ontime"="SUM_TP_ONTIME","sum_tp_late"="SUM_TP_LATE","ontime"="ONTIME","sum_revenue_miles"="SUM_REVENUE_MILES","sum_revenue_hours"="SUM_REVENUE_HOURS","avg_passengers_on"="AVG_PASSENGERS_ON","avg_passengers_off"="AVG_PASSENGERS_OFF","avg_revenue_miles"="AVG_REVENUE_MILES","avg_revenue_hours"="AVG_REVENUE_HOURS","sum_passenger_miles"="SUM_PASSENGER_MILES","avg_passenger_miles"="AVG_PASSENGER_MILES","sum_seat_miles"="SUM_SEAT_MILES","avg_pass_per_mile"="AVG_PASS_PER_MILE","avg_pass_per_hour"="AVG_PASS_PER_HOUR","avg_seat_miles"="AVG_SEAT_MILES","avg_trip_length_miles"="AVG_TRIP_LENGTH_MILES","passenger_miles_per_seat_mile"="PASSENGER_MILES_PER_SEAT_MILE","vehicle_speed_mph"="VEHICLE_SPEED_MPH","passenger_hours"="PASSENGER_HOURS","avg_trip_length_minutes"="AVG_TRIP_LENGTH_MINUTES","passenger_miles_per_gallon_fuel"="PASSENGER_MILES_PER_GALLON_FUEL"))
 
+#Order source file
+source <- source[,c("VINTAGE_YR","YR","DATE_COUNTED","ROUTE_NUM","ROUTE_NAME","SERVICE_CODE","SERVICE_TYPE","SERVICE_CLASS","SERVICE_MODE","TRIPS","TRIPS_GROSS","SUM_PASSENGERS_ON","SUM_FON","SUM_RON","SUM_PASSENGERS_OFF","SUM_FOFF","SUM_ROFF","SUM_WHEELCHAIRS","SUM_BICYCLES","SUM_KNEELS","MAX_LOAD","MAX_LOAD_P","AVG_MAX_LOAD","SUM_TP_EARLY","SUM_TP_ONTIME","SUM_TP_LATE","ONTIME","SUM_REVENUE_MILES","SUM_REVENUE_HOURS","AVG_PASSENGERS_ON","AVG_PASSENGERS_OFF","AVG_REVENUE_MILES","AVG_REVENUE_HOURS","SUM_PASSENGER_MILES","AVG_PASSENGER_MILES","SUM_SEAT_MILES","AVG_PASS_PER_MILE","AVG_PASS_PER_HOUR","AVG_SEAT_MILES","AVG_TRIP_LENGTH_MILES","PASSENGER_MILES_PER_SEAT_MILE","VEHICLE_SPEED_MPH","PASSENGER_HOURS","AVG_TRIP_LENGTH_MINUTES","PASSENGER_MILES_PER_GALLON_FUEL")]
+
+#delete rownames for checking files match
+rownames(source) <- NULL
+rownames(db) <- NULL
+
 #Replace route names with route numbers in ROUTE_NUM column
 source$ROUTE_NUM[source$ROUTE_NUM == "Coaster*"] <- "398"
 source$ROUTE_NUM[source$ROUTE_NUM == "Coaster"] <- "398"
@@ -556,31 +544,18 @@ source$DATE_COUNTED[source$DATE_COUNTED == "Spring 2007"] <- NA
 source[83,5] <- "Encinitas Coaster Connection"
 #unique(source$ROUTE_NAME)
 
-#Check data types
-# str(source)
-# str(db)
-
 #Convert data types
 source$VINTAGE_YR <- as.integer(source$VINTAGE_YR)
 source$YR <- as.integer(source$YR)
 
-unique(source$YR)
-# source$DATE_COUNTED <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
-# anydate(source$DATE_COUNTED, tz = "UTC")
-
-library(anytime)
-#t <- 2004:2006
-# if (source$YR == 2004){
-#   source$DATE_COUNTED =  anydate(source$DATE_COUNTED, tz = "UTC")
-# } else source$DATE_COUNTED = as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
-
+#Convert DATE_COUNTED data type
 t <- 2004:2006
-source$DATE_COUNTED <- ifelse(source$YR %in% t,anydate(source$DATE_COUNTED, tz = "UTC"),as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d"))
-
-# anydate(1049155200, tz = "UTC")
-# anytime(37591)
-
+tt <- anydate(as.numeric(as.character(source$DATE_COUNTED))[which(source$YR %in% t)], tz = "UTC")
+source$DATE_COUNTED <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
+source[318:806,3] <- tt
 db$DATE_COUNTED <- as.Date(db$DATE_COUNTED)
+
+#Convert data types
 source$ROUTE_NUM <- as.numeric(source$ROUTE_NUM)
 source$TRIPS <- as.integer(source$TRIPS)
 source$TRIPS_GROSS <- as.integer(source$TRIPS_GROSS)
@@ -639,11 +614,10 @@ all.equal(source,db)
 identical(source,db)
 which(source!=db, arr.ind=TRUE)
 
-db[318,3]
-source[318,3]
+# db[318,3]
+# source[318,3]
 
 
-# source$DATE_COUNTED <- as.Date(as.numeric(as.character(source$DATE_COUNTED)), origin = "1899-12-30", format = "%Y-%m-%d")
 
 #### Testing if the data match without the 2004-2006 data ###########
 
@@ -672,3 +646,9 @@ source[318,3]
 # # source_wo[467,43]
 # # all.equal(db_wo[443,37],source_wo[443,37])
 
+
+
+
+
+
+#Source to fact table QA
