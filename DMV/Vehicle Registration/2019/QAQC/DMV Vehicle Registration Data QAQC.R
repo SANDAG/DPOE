@@ -8,15 +8,15 @@ getwd()
 
 #Check source file to raw database upload
 #Read in source files
-source2010 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2010.csv",sep=',', header = TRUE)
-source2011 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2011.csv",sep=',', header = TRUE)
-source2012 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2012.csv",sep=',', header = TRUE)
-source2013 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2013.csv",sep=',', header = TRUE)
-source2014 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2014.csv",sep=',', header = TRUE)
-source2015 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2015.csv",sep=',', header = TRUE)
-source2016 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2016.csv",sep=',', header = TRUE)
-source2017 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2017.csv",sep=',', header = TRUE)
-source2018 <- read.csv("R:\\DPOE\\DMV Data\\2019\\Source\\Vehicle Registration\\SANDAG2018.csv",sep=',', header = TRUE)
+source2010 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2010.csv",sep=',', header = TRUE)
+source2011 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2011.csv",sep=',', header = TRUE)
+source2012 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2012.csv",sep=',', header = TRUE)
+source2013 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2013.csv",sep=',', header = TRUE)
+source2014 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2014.csv",sep=',', header = TRUE)
+source2015 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2015.csv",sep=',', header = TRUE)
+source2016 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2016.csv",sep=',', header = TRUE)
+source2017 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2017.csv",sep=',', header = TRUE)
+source2018 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2018.csv",sep=',', header = TRUE)
 
 #Merge source files into one file
 source <- do.call("rbind", list(source2010,source2011,source2012,source2013,source2014,source2015,source2016,source2017,source2018))
@@ -98,5 +98,51 @@ sql_query <- 'SELECT * FROM [dpoe_stage].[fact].[dmv_vehicle_reg]'
 fact <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
 
+#Drop ID column from fact table
+fact <- fact[-1]
+
+#Rename columns in source file
+source <- plyr::rename(source, c("YEAR"="yr", "ADDRESS"="address", "ZIP"="zip", "MAKE"="make", "SERIES"="series", "MODEL"="model", "MODEL_YEAR"="model_yr", "OWN_DATE"="own_date", "REG_DATE"="reg_date", "FUEL"="fuel_type", "LOCSOLD"="loc_sold", "OWNERSHIP"="own"))
+
+#Replace blanks and 00000's with NA's
+source$zip[source$zip == 00000] <- NA
+source$own_date[source$own_date == 00000] <- NA
+source$reg_date[source$reg_date == 00000] <- NA
+source$zip[source$zip == ""] <- NA
+source$model[source$model == ""] <- NA
+source$model_yr[source$model_yr == ""] <- NA
+source$make[source$make == ""] <- NA
+source$series[source$series == ""] <- NA
+source$fuel_type[source$fuel_type == ""] <- NA
+
+#Check data types
+str(source)
+str(fact)
+
+#Change data types
+fact$reg_date <- as.Date(fact$reg_date)
+fact$own_date <- as.Date(fact$own_date)
 
 
+library(anytime)
+# source$reg_date <- as.Date(as.numeric(as.character(source$reg_date)), origin = "1970-01-01", format = "%Y-%m-%d")
+# source$own_date <- as.Date(as.numeric(as.character(source$own_date)), origin = "1970-01-01", format = "%Y-%m-%d")
+anydate(source$own_date, tz='UTC')
+
+
+#Order data
+source <- source[order(source$yr,source$address,source$zip,source$make,source$series,source$model,source$model_yr,source$own_date,source$reg_date,source$fuel_type,source$loc_sold,source$own),]
+fact <- fact[order(fact$yr,fact$address,fact$zip,fact$make,fact$series,fact$model,fact$model_yr,fact$own_date,fact$reg_date,fact$fuel_type,fact$loc_sold,fact$own),]
+
+#delete rownames for checking files match
+rownames(source) <- NULL
+rownames(fact) <- NULL
+
+#Compare files 
+all(source == fact) #check cell values only
+all.equal(source,fact) #check cell values and data types and will return the conflicted cells
+identical(source,fact) #check cell values and data types
+which(source!=fact, arr.ind = TRUE)
+
+source[11622753,3]
+fact[11622753,3]
