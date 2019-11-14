@@ -8,18 +8,19 @@ getwd()
 
 #Check source file to raw database upload
 #Read in source files
-source2010 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2010.csv",guess_max = 40000)
-source2011 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2011.csv",guess_max = 40000)
-source2012 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2012.csv",guess_max = 40000)
-source2013 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2013.csv",guess_max = 40000)
-source2014 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2014.csv",guess_max = 40000)
-source2015 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2015.csv",guess_max = 40000)
-source2016 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2016.csv",guess_max = 40000)
-source2017 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2017.csv",guess_max = 40000)
-source2018 <- read_csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2018.csv",guess_max = 40000)
+source2010 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2010.csv",sep=',', header = TRUE)
+source2011 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2011.csv",sep=',', header = TRUE)
+source2012 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2012.csv",sep=',', header = TRUE)
+source2013 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2013.csv",sep=',', header = TRUE)
+source2014 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2014.csv",sep=',', header = TRUE)
+source2015 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2015.csv",sep=',', header = TRUE)
+source2016 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2016.csv",sep=',', header = TRUE)
+source2017 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2017.csv",sep=',', header = TRUE)
+source2018 <- read.csv("R:\\DPOE\\Vehicle Registration\\DMV\\2019\\Source\\SANDAG2018.csv",sep=',', header = TRUE)
 
 #Merge source files into one file
 source <- do.call("rbind", list(source2010,source2011,source2012,source2013,source2014,source2015,source2016,source2017,source2018))
+#rm(source)
 
 #Read in SQL files
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
@@ -55,39 +56,17 @@ odbcClose(channel)
 db <- do.call("rbind", list(db2010,db2011,db2012,db2013,db2014,db2015,db2016,db2017,db2018))
 
 #Check data types
-str(source)
-str(db)
-
-#Convert to data frame
-source <- as.data.frame(source)
-
-#Remove attributes from source
-attr(source, "spec") <- NULL
-
-db$OWN_DATE[length(db$OWN_DATE) == 5] <- paste("0",db$OWN_DATE)
-
-if(length(db$OWN_DATE) == 5){
-  print("Non-negative number")
-} else {
-  print("Negative number")
-}
+# str(source)
+# str(db)
 
 #Convert data types
-source$YEAR <- as.integer(source$YEAR)
-source$ZIP <- as.integer(source$ZIP)
-source$MODEL_YEAR <- as.integer(source$MODEL_YEAR)
-db$OWN_DATE <- as.Date(as.character(db$OWN_DATE), format='%y%m%d')
-db$REG_DATE <- as.Date(as.character(db$REG_DATE), format='%y%m%d')
-source$OWN_DATE <- as.Date(as.character(source$OWN_DATE), format='%y%m%d')
-source$REG_DATE <- as.Date(as.character(source$REG_DATE), format='%y%m%d')
-
-#Replace blanks with NA's
-db$ZIP[db$ZIP == ""] <- NA
-db$MODEL[db$MODEL == ""] <- NA
-db$MODEL_YEAR[db$MODEL_YEAR == ""] <- NA
-db$MAKE[db$MAKE == ""] <- NA
-db$SERIES[db$SERIES == ""] <- NA
-db$FUEL[db$FUEL == ""] <- NA
+source$ADDRESS <- as.character(source$ADDRESS)
+source$MAKE <- as.character(source$MAKE)
+source$SERIES <- as.character(source$SERIES)
+source$MODEL <- as.character(source$MODEL)
+source$FUEL <- as.character(source$FUEL)
+source$LOCSOLD <- as.character(source$LOCSOLD)
+source$OWNERSHIP <- as.character(source$OWNERSHIP)
 
 #Order files
 source <- source[order(source$YEAR,source$ADDRESS,source$ZIP,source$MAKE,source$SERIES,source$MODEL,source$MODEL_YEAR,source$OWN_DATE,source$REG_DATE,source$FUEL,source$LOCSOLD,source$OWNERSHIP),]
@@ -106,9 +85,9 @@ which(source!=db, arr.ind = TRUE)
 #Delete individual data frames
 # rm(db2010,db2011,db2012,db2013,db2014,db2015,db2016,db2017,db2018)
 # rm(source2010,source2011,source2012,source2013,source2014,source2015,source2016,source2017,source2018)
-# 
-source[23,8]
-db[23,8]
+
+# source[9194888,4]
+# db[9194888,4]
 
 ########################################################################################################################################################
 
@@ -127,9 +106,9 @@ fact <- fact[-1]
 source <- plyr::rename(source, c("YEAR"="yr", "ADDRESS"="address", "ZIP"="zip", "MAKE"="make", "SERIES"="series", "MODEL"="model", "MODEL_YEAR"="model_yr", "OWN_DATE"="own_date", "REG_DATE"="reg_date", "FUEL"="fuel_type", "LOCSOLD"="loc_sold", "OWNERSHIP"="own"))
 
 #Replace blanks and 00000's with NA's
-source$zip[source$zip == 00000] <- NA
-source$own_date[source$own_date == 00000] <- NA
-source$reg_date[source$reg_date == 00000] <- NA
+source$zip[source$zip == 0] <- NA
+source$own_date[source$own_date == 0] <- NA
+source$reg_date[source$reg_date == 0] <- NA
 source$zip[source$zip == ""] <- NA
 source$model[source$model == ""] <- NA
 source$model_yr[source$model_yr == ""] <- NA
@@ -144,18 +123,109 @@ str(fact)
 #Change data types
 fact$reg_date <- as.Date(fact$reg_date)
 fact$own_date <- as.Date(fact$own_date)
-  
-  as.Date(as.numeric(as.character(source$OWN_DATE)), format = "%Y-%m-%d", origin )
-as.Date(as.numeric(as.character(source$OWN_DATE)), origin = "1970-01-01", format = "%Y-%m-%d")
-
-library(anytime)
-# source$reg_date <- as.Date(as.numeric(as.character(source$reg_date)), origin = "1970-01-01", format = "%Y-%m-%d")
-# source$own_date <- as.Date(as.numeric(as.character(source$own_date)), origin = "1890-12-30", format = "%Y-%m-%d")
-anydate(source$own_date, tz="UTC")
+source$own_date <- formatC(source$own_date, width = 6, format = "d", flag = "0")
+source$reg_date <- formatC(source$reg_date, width = 6, format = "d", flag = "0")
+source$own_date <- as.Date(as.character(source$own_date), format='%y%m%d')
+source$reg_date <- as.Date(as.character(source$reg_date), format='%y%m%d')
 
 #Order data
 source <- source[order(source$yr,source$address,source$zip,source$make,source$series,source$model,source$model_yr,source$own_date,source$reg_date,source$fuel_type,source$loc_sold,source$own),]
 fact <- fact[order(fact$yr,fact$address,fact$zip,fact$make,fact$series,fact$model,fact$model_yr,fact$own_date,fact$reg_date,fact$fuel_type,fact$loc_sold,fact$own),]
+
+#Overwrite incorrect 20XX values with 19XX values
+source[2643178:2643180,1:9]
+fact[2643178:2643180,1:9]
+#source[2643179,9] <-"1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2011 & source$zip == 92101] <- "1965-09-15"
+
+source[3937874:3937876,1:9]
+fact[3937874:3937876,1:9]
+#source[3937875,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2011 & source$zip == 92123] <- "1968-05-16"
+
+
+source[402206:402208,1:9]
+fact[402206:402208,1:9]
+#source[402207,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2010 & source$zip == 92101] <- "1965-09-15"
+
+source[1678010:1678012,1:9]
+fact[1678010:1678012,1:9]
+#source[1678011,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2010 & source$zip == 92123] <- "1968-05-16"
+
+source[4919394,1:9]
+fact[4919394,1:9]
+#source[4919394,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2012 & source$zip == 92101] <- "1965-09-15"
+
+source[6241464,1:9]
+fact[6241464,1:9]
+#source[6241464,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2012 & source$zip == 92123] <- "1968-05-16"
+
+source[7243594,1:9]
+fact[7243594,1:9]
+#source[7243594,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2013 & source$zip == 92101] <- "1965-09-15"
+
+source[8597050,1:9]
+fact[8597050,1:9]
+#[8597050,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2013 & source$zip == 92123] <- "1968-05-16"
+
+source[9623017,1:9]
+fact[9623017,1:9]
+#source[9623017,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2014 & source$zip == 92101] <- "1965-09-15"
+
+source[11016554,1:9]
+fact[11016554,1:9]
+#source[11016554,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2014 & source$zip == 92123] <- "1968-05-16"
+
+source[12071424,1:9]
+fact[12071424,1:9]
+#source[12071424,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2015 & source$zip == 92101] <- "1965-09-15"
+
+
+source[13516930,1:9]
+fact[13516930,1:9]
+#source[13516930,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2015 & source$zip == 92123] <- "1968-05-16"
+
+
+#Changed this one
+source[14600697,1:9]
+fact[14600697,1:9]
+#source[14600698,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2016 & source$zip == 92101] <- "1965-09-15"
+
+source[16071419,1:9]
+fact[16071419,1:9]
+#source[16071419,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2016 & source$zip == 92123] <- "1968-05-16"
+
+source[17170819,1:9]
+fact[17170819,1:9] 
+#source[17170819,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2017 & source$zip == 92101] <- "1965-09-15"
+
+source[18653902,1:9]
+fact[18653902,1:9]
+#source[18653902,9] <- "1968-05-16"
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2017 & source$zip == 92123] <- "1968-05-16"
+
+source[19779097,1:9]
+fact[19779097,1:9]
+#source[19779097,9] <- "1965-09-15"
+source$reg_date[source$address == "1365 N HARBOR DR" & source$yr == 2018 & source$zip == 92101] <- "1965-09-15"
+
+source[21327362,1:9]
+fact[21327362,1:9]
+#source[21327362,9] <- "1968-05-16" 
+source$reg_date[source$address == "5555 OVERLAND AVE BLDG 11 1798" & source$yr == 2018 & source$zip == 92123] <- "1968-05-16"
 
 #delete rownames for checking files match
 rownames(source) <- NULL
@@ -167,5 +237,15 @@ all.equal(source,fact) #check cell values and data types and will return the con
 identical(source,fact) #check cell values and data types
 which(source!=fact, arr.ind = TRUE)
 
-source[11622753,3]
-fact[11622753,3]
+# source[402206:402208,1:9]
+# fact[402206:402208,1:9]
+# 
+# sum(is.na(source$reg_date))
+# sum(is.na(fact$reg_date))
+# sum(source$reg_date == "")
+# source[source=='NA'] <- NA
+# fact[fact=='NA'] <- NA
+# 
+# source_subset <- subset(source, address == "1365 N HARBOR DR")
+# fact_subset <- subset(fact, address == "1365 N HARBOR DR")
+
