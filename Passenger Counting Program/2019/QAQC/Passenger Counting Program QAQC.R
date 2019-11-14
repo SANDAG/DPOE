@@ -58,8 +58,6 @@ source16 <- as.data.frame(source16)
 source17 <- as.data.frame(source17)
 source18 <- as.data.frame(source18)
 source19 <- as.data.frame(source19)
-# alldata <- c(source02, source03, source04, source05, source06, source07, source08, source09, source10, source11, source12, source13, source14, source15, source16, source17, source18, source19)
-# tt<- lapply(alldata,as.data.frame)
 
 #Convert to numeric
 source02$...7 <- as.numeric(source02$...7)
@@ -511,6 +509,69 @@ source17 <- plyr::rename(source17, c("ROUTE_NUMBER"="ROUTE_NUM", "MAX_MAX_LOAD"=
 source18 <- plyr::rename(source18, c("ROUTE_NUMBER"="ROUTE_NUM", "MAX_MAX_LOAD"="MAX_LOAD", "AVG_TRIP_LENGTH"="AVG_TRIP_LENGTH_MILES", "MAX_MAX_LOAD_P"="MAX_LOAD_P"))
 source19 <- plyr::rename(source19, c("ROUTE_NUMBER"="ROUTE_NUM", "MAX_MAX_LOAD"="MAX_LOAD", "AVG_TRIP_LENGTH"="AVG_TRIP_LENGTH_MILES", "MAX_MAX_LOAD_P"="MAX_LOAD_P"))
 
+
+###################TESTING#########################################
+
+
+#Special case for Route 3 prior to 2008
+
+#2002
+df <- merge(x=source08,y=source02,by="ROUTE_NUM",all.y=TRUE) #151
+df <- df[order(df[,1]), ]
+source02 <- source02[order(source02[,1]), ]
+source02$SERVICE_CLASS <- df$SERVICE_CLASS.x
+
+#2003
+df <- merge(x=source08,y=source03,by="ROUTE_NUM",all.y=TRUE) #166
+df <- df[order(df[,1]), ]
+source03 <- source03[order(source03[,1]), ]
+source03$SERVICE_CLASS <- df$SERVICE_CLASS.x
+
+#2004
+df <- merge(x=source08,y=source04,by="ROUTE_NUM",all.y=TRUE) #164
+df <- df[order(df[,1]), ]
+source04 <- source04[order(source04[,1]), ]
+source04$SERVICE_CLASS <- df$SERVICE_CLASS.x
+
+#2005
+df <- merge(x=source08,y=source05,by="ROUTE_NUM",all.y=TRUE) #164
+df <- df[order(df[,1]), ]
+source05 <- source05[order(source05[,1]), ]
+source05$SERVICE_CLASS <- df$SERVICE_CLASS.x
+
+#2006
+df <- merge(x=source08,y=source06,by="ROUTE_NUM",all.y=TRUE) #161
+df <- df[order(df[,1]), ]
+source06 <- source06[order(source06[,1]), ]
+source06$SERVICE_CLASS <- df$SERVICE_CLASS.x
+
+#2007
+df <- merge(x=source08,y=source07,by="ROUTE_NUM",all.y=TRUE) #150
+df <- df[order(df[,1]), ]
+source07 <- source07[order(source07[,1]), ]
+source07$SERVICE_CLASS <- df$SERVICE_CLASS.x
+rm(df)
+
+#Rail
+source02$SERVICE_CLASS <- ifelse(source02$ROUTE_NUM == "Orange Line" | source02$ROUTE_NUM == "Blue Line", "Rail", source02$SERVICE_CLASS)
+source03$SERVICE_CLASS <- ifelse(source03$ROUTE_NUM == "Orange Line" | source03$ROUTE_NUM == "Blue Line", "Rail", source03$SERVICE_CLASS)
+source04$SERVICE_CLASS <- ifelse(source04$ROUTE_NUM == "Orange Line" | source04$ROUTE_NUM == "Blue Line", "Rail", source04$SERVICE_CLASS)
+source05$SERVICE_CLASS <- ifelse(source05$ROUTE_NUM == "Orange Line" | source05$ROUTE_NUM == "Blue Line", "Rail", source05$SERVICE_CLASS)
+source06$SERVICE_CLASS <- ifelse(source06$ROUTE_NUM == "Orange Line" | source06$ROUTE_NUM == "Blue Line" | source06$ROUTE_NUM == "Green Line", "Rail", source06$SERVICE_CLASS)
+source07$SERVICE_CLASS <- ifelse(source07$ROUTE_NUM == "Orange Line" | source07$ROUTE_NUM == "Blue Line" | source07$ROUTE_NUM == "Green Line", "Rail", source07$SERVICE_CLASS)
+
+#Coaster
+source02$SERVICE_CLASS <- ifelse(source02$ROUTE_NUM == "Coaster", "Coaster", source02$SERVICE_CLASS)
+source03$SERVICE_CLASS <- ifelse(source03$ROUTE_NUM == "Coaster*", "Coaster", source03$SERVICE_CLASS)
+source04$SERVICE_CLASS <- ifelse(source04$ROUTE_NUM == "COASTER", "Coaster", source04$SERVICE_CLASS)
+source05$SERVICE_CLASS <- ifelse(source05$ROUTE_NUM == "COASTER", "Coaster", source05$SERVICE_CLASS)
+source06$SERVICE_CLASS <- ifelse(source06$ROUTE_NUM == "COASTER", "Coaster", source06$SERVICE_CLASS)
+source07$SERVICE_CLASS <- ifelse(source07$ROUTE_NUM == "COASTER", "Coaster", source07$SERVICE_CLASS)
+
+
+
+###################################################################
+
 #Merge source files into one file
 source <- do.call("rbind", list(source02,source03,source04,source05,source06,source07,source08,source09,source10,source11,source12,source13,source14,source15,source16,source17,source18,source19))
 
@@ -651,6 +712,149 @@ which(source!=db, arr.ind=TRUE)
 
 
 
+
+###TESTING ####
+# unique(source$SERVICE_CLASS)
+# unique(db$SERVICE_CLASS)
+# 
+# sum(is.na(source$SERVICE_CLASS)) #281
+# sum(is.na(db$SERVICE_CLASS)) #261
+# 
+# table(source$SERVICE_CLASS)
+# table(db$SERVICE_CLASS) #problem with coaster and rail
+# 
+# route_source <- table(source$ROUTE_NAME)
+# route_db <- table(db$ROUTE_NAME)
+# all.equal(route_source,route_db)
+# 
+# write.csv(source, file = "M:\\TEMP\\LOU\\Source.csv",row.names=FALSE, na="NA")
+# write.csv(db, file = "M:\\TEMP\\LOU\\DB.csv",row.names=FALSE, na="NA")
+# 
+# write.csv(route_source, file = "M:\\TEMP\\LOU\\Source.csv",row.names=FALSE, na="NA")
+# write.csv(route_db, file = "M:\\TEMP\\LOU\\DB.csv",row.names=FALSE, na="NA")
+# 
+# str(source)
+# str(db)
+
+#########################################################################################################################################
 #Source to fact table QA
 
+#Load fact table
+options(stringsAsFactors=FALSE)
+channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=dpoe_stage; trusted_connection=true')
+sql_query1 <- read_file("Fact table QAQC.sql")
+fact <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
+odbcClose(channel)
 
+#Check data types
+# str(source)
+# str(fact)
+
+#Convert data types
+fact$date_counted <- as.Date(fact$date_counted)
+
+#Rename source columns
+names(source)[1:45] <- tolower(names(source)[1:45])
+
+#Assign names to routes before 2008
+#Create a subset of data for each year
+x02 <- subset(source, yr == 2002)
+x03 <- subset(source, yr == 2003)
+x04 <- subset(source, yr == 2004)
+x05 <- subset(source, yr == 2005)
+x06 <- subset(source, yr == 2006)
+x07 <- subset(source, yr == 2007)
+x08 <- subset(source, yr == 2008)
+
+#Order source table by year, route_num
+source <- source[order(source$yr,source$route_num), ]   
+
+# Route name
+#2002
+df <- merge(x=x08,y=x02,by="route_num",all.y=TRUE)
+df <- df[order(df[,1]), ]
+x02 <- x02[order(x02[,4]), ]
+source$service_code <- ifelse(source$yr == 2002, df$service_code.x, source$service_code)
+source$service_type <- ifelse(source$yr == 2002, df$service_type.x, source$service_type)
+source$service_mode <- ifelse(source$yr == 2002, df$service_mode.x, source$service_mode)
+
+#2003
+df <- merge(x=x08,y=x03,by="route_num",all.y=TRUE)
+df <- df[order(df[,1]), ]
+x03 <- x03[order(x03[,4]), ]
+source$service_code <- ifelse(source$yr == 2003, df$service_code.x, source$service_code)
+source$service_type <- ifelse(source$yr == 2003, df$service_type.x, source$service_type)
+source$service_mode <- ifelse(source$yr == 2003, df$service_mode.x, source$service_mode)
+
+#2004
+df <- merge(x=x08,y=x04,by="route_num",all.y=TRUE)
+df <- df[order(df[,1]), ]
+x04 <- x04[order(x04[,4]), ]
+source$service_code <- ifelse(source$yr == 2004, df$service_code.x, source$service_code)
+source$service_type <- ifelse(source$yr == 2004, df$service_type.x, source$service_type)
+source$service_mode <- ifelse(source$yr == 2004, df$service_mode.x, source$service_mode)
+
+#2005
+df <- merge(x=x08,y=x05,by="route_num",all.y=TRUE)
+df <- df[order(df[,1]), ]
+x05 <- x05[order(x05[,4]), ]
+source$service_code <- ifelse(source$yr == 2005, df$service_code.x, source$service_code)
+source$service_type <- ifelse(source$yr == 2005, df$service_type.x, source$service_type)
+source$service_mode <- ifelse(source$yr == 2005, df$service_mode.x, source$service_mode)
+
+#2006
+df <- merge(x=x08,y=x06,by="route_num",all.y=TRUE)
+df <- df[order(df[,1]), ]
+x06 <- x06[order(x06[,4]), ]
+source$service_code <- ifelse(source$yr == 2006, df$service_code.x, source$service_code)
+source$service_type <- ifelse(source$yr == 2006, df$service_type.x, source$service_type)
+source$service_mode <- ifelse(source$yr == 2006, df$service_mode.x, source$service_mode)
+
+#2007
+df <- merge(x=x08,y=x07,by="route_num",all.y=TRUE)
+df <- df[order(df[,1]), ]
+x07 <- x07[order(x07[,4]), ]
+source$service_code <- ifelse(source$yr == 2007, df$service_code.x, source$service_code)
+source$service_type <- ifelse(source$yr == 2007, df$service_type.x, source$service_type)
+source$service_mode <- ifelse(source$yr == 2007, df$service_mode.x, source$service_mode)
+rm(df,x02,x03,x04,x05,x06,x07,x08)
+
+#Update route name column in source file to match fact table
+source$route_name <- ifelse(source$yr <2008 & is.na(source$route_name) & !is.na(source$route_num),paste0("Route #",source$route_num),source$route_name)
+
+#Other
+source$route_name <- ifelse(source$route_name == "Route #398","Route #398 Coaster",source$route_name)
+source$route_num <- ifelse(source$route_name == "Encinitas Coaster Connection",374,source$route_num)
+source$service_code <- ifelse(source$route_name == "Encinitas Coaster Connection","NCTD",source$service_code)
+source$service_type <- ifelse(source$route_name == "Encinitas Coaster Connection","Fixed route",source$service_type)
+source$service_mode <- ifelse(source$route_name == "Encinitas Coaster Connection","Bus",source$service_mode)
+
+
+#Round digits to account for the impreciseness of the float data type in the SQL database
+fact$avg_pass_per_mile <- round(fact$avg_pass_per_mile,10)
+fact$avg_pass_per_hour <- round(fact$avg_pass_per_hour,10)
+fact$avg_trip_length_miles <- round(fact$avg_trip_length_miles,9)
+fact$vehicle_speed_mph <- round(fact$vehicle_speed_mph,10)
+fact$passenger_hours <- round(fact$passenger_hours,8)
+fact$avg_trip_length_minutes <- round(fact$avg_trip_length_minutes,10)
+fact$passenger_miles_per_gallon_fuel <- round(fact$passenger_miles_per_gallon_fuel,10)
+
+#Order fact file
+fact <- fact[order(fact$yr,fact$route_num), ]
+source <- source[order(source$yr,source$route_num), ]
+
+#delete rownames for checking files match
+rownames(source) <- NULL
+rownames(fact) <- NULL
+
+# compare source to fact files to ensure they match
+all(source == fact)
+all.equal(source,fact)
+identical(source,fact)
+which(source!=fact, arr.ind=TRUE)
+
+fact[102,1:10]
+source[102,1:10]
+
+fact[101,45]
+source[101,45]
