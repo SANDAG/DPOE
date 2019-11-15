@@ -754,77 +754,18 @@ fact <- sqlQuery(channel,sql_query1,stringsAsFactors = FALSE)
 odbcClose(channel)
 
 #Check data types
-# str(source)
-# str(fact)
+str(source)
+str(fact)
 
 #Convert data types
 fact$date_counted <- as.Date(fact$date_counted)
 
+#Get rid of extra 0's in route_num
+source$route_num <- round(source$route_num,0)
+fact$route_num <- round(fact$route_num,0)
+
 #Rename source columns
 names(source)[1:45] <- tolower(names(source)[1:45])
-
-#Assign names to routes before 2008
-#Create a subset of data for each year
-x02 <- subset(source, yr == 2002)
-x03 <- subset(source, yr == 2003)
-x04 <- subset(source, yr == 2004)
-x05 <- subset(source, yr == 2005)
-x06 <- subset(source, yr == 2006)
-x07 <- subset(source, yr == 2007)
-x08 <- subset(source, yr == 2008)
-
-#Order source table by year, route_num
-source <- source[order(source$yr,source$route_num), ]   
-
-#Service Code, Type, and Mode
-#2002
-# df <- merge(x=x08,y=x02,by="route_num",all.y=TRUE)
-# df <- df[order(df[,1]), ]
-# x02 <- x02[order(x02[,4]), ]
-# source$service_code <- ifelse(source$yr == 2002, df$service_code.x, source$service_code)
-# source$service_type <- ifelse(source$yr == 2002, df$service_type.x, source$service_type)
-# source$service_mode <- ifelse(source$yr == 2002, df$service_mode.x, source$service_mode)
-# 
-# #2003
-# df <- merge(x=x08,y=x03,by="route_num",all.y=TRUE)
-# df <- df[order(df[,1]), ]
-# x03 <- x03[order(x03[,4]), ]
-# source$service_code <- ifelse(source$yr == 2003, df$service_code.x, source$service_code)
-# source$service_type <- ifelse(source$yr == 2003, df$service_type.x, source$service_type)
-# source$service_mode <- ifelse(source$yr == 2003, df$service_mode.x, source$service_mode)
-# 
-# #2004
-# df <- merge(x=x08,y=x04,by="route_num",all.y=TRUE)
-# df <- df[order(df[,1]), ]
-# x04 <- x04[order(x04[,4]), ]
-# source$service_code <- ifelse(source$yr == 2004, df$service_code.x, source$service_code)
-# source$service_type <- ifelse(source$yr == 2004, df$service_type.x, source$service_type)
-# source$service_mode <- ifelse(source$yr == 2004, df$service_mode.x, source$service_mode)
-# 
-# #2005
-# df <- merge(x=x08,y=x05,by="route_num",all.y=TRUE)
-# df <- df[order(df[,1]), ]
-# x05 <- x05[order(x05[,4]), ]
-# source$service_code <- ifelse(source$yr == 2005, df$service_code.x, source$service_code)
-# source$service_type <- ifelse(source$yr == 2005, df$service_type.x, source$service_type)
-# source$service_mode <- ifelse(source$yr == 2005, df$service_mode.x, source$service_mode)
-# 
-# #2006
-# df <- merge(x=x08,y=x06,by="route_num",all.y=TRUE)
-# df <- df[order(df[,1]), ]
-# x06 <- x06[order(x06[,4]), ]
-# source$service_code <- ifelse(source$yr == 2006, df$service_code.x, source$service_code)
-# source$service_type <- ifelse(source$yr == 2006, df$service_type.x, source$service_type)
-# source$service_mode <- ifelse(source$yr == 2006, df$service_mode.x, source$service_mode)
-# 
-# #2007
-# df <- merge(x=x08,y=x07,by="route_num",all.y=TRUE)
-# df <- df[order(df[,1]), ]
-# x07 <- x07[order(x07[,4]), ]
-# source$service_code <- ifelse(source$yr == 2007, df$service_code.x, source$service_code)
-# source$service_type <- ifelse(source$yr == 2007, df$service_type.x, source$service_type)
-# source$service_mode <- ifelse(source$yr == 2007, df$service_mode.x, source$service_mode)
-# rm(df,x02,x03,x04,x05,x06,x07,x08)
 
 #Update route name column in source file to match fact table
 source$route_name <- ifelse(source$yr <2008 & is.na(source$route_name) & !is.na(source$route_num),paste0("Route #",source$route_num),source$route_name)
@@ -839,6 +780,28 @@ source$service_code <- ifelse(source$route_name == "Encinitas Coaster Connection
 source$service_type <- ifelse(source$route_name == "Encinitas Coaster Connection","Fixed route",source$service_type)
 source$service_mode <- ifelse(source$route_name == "Encinitas Coaster Connection","Bus",source$service_mode)
 
+#Update service code, class, and mode in source table
+
+#Create list of distinct values
+xx <- as.data.frame(subset(unique(source[c("route_num","route_name","service_code","service_type","service_class","service_mode")]),!is.na("route_num")))
+xx <- xx[order(xx$route_num,xx$route_name), ]
+xx <- xx %>%  filter(!duplicated(.[,1:2], fromLast = T))
+xx$route_num <- round(xx$route_num,0)
+
+# #Add in the extra route 3
+# df<-data.frame("3","Route #3","MTS","Local","Bus - Direct","Bus")
+# names(df)<-c("route_num","route_name","service_code","service_type","service_class","service_mode")
+# xx <- rbind(df, xx)
+
+#Replace values in source table with that of xx table
+
+#Test 1
+source$service_code <- ifelse(xx$route_num == source$route_num, xx$service_code,source$service_code)
+
+#Test 2
+test <- merge(x=source,y=xx,all.x=TRUE)
+test$route_num <- round(test$route_num,0)
+source$service_code <- ifelse(test$route_num == source$route_num, xx$service_code,source$service_code)
 
 #Round digits to account for the impreciseness of the float data type in the SQL database
 fact$avg_pass_per_mile <- round(fact$avg_pass_per_mile,10)
