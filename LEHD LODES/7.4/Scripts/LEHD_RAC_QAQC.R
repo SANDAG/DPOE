@@ -3,7 +3,7 @@ maindir = dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(maindir)
 
 # import functions
-<<<<<<< HEAD
+
 install.packages("here")
 library(here)
 source(here("Common_functions","readSQL.R"))
@@ -12,164 +12,205 @@ source(here("Common_functions","config.R"))
 
 # import packages
 packages <- c("RODBC","tidyverse","openxlsx","hash","plyr","devtools", "data.table")
-=======
-source("config.R")
-source("../readSQL.R")
-source("common_functions.R")
-
-# import packages
-packages <- c("RODBC","tidyverse","openxlsx","hash","plyr")
->>>>>>> 030e083d0ea5c14b7a5e58a51ded6fd74b414a68
 pkgTest(packages)
 
 # initialize start time
 sleep_for_a_minute <- function() { Sys.sleep(60) }
 start_time <- Sys.time()
-<<<<<<< HEAD
-
 
 #Import Database Data
 channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=socioec_data_stage; trusted_connection=true')
 sql_query <- getSQL("../Queries/import_lodes74_rac.sql")
 database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
 odbcClose(channel)
-save.image(file = 'database_data', "C:/database_data.RData")
 gc() #release memory
 
-#Import Source Data
+###Import Source Data###
 setwd("R:/DPOE/LEHD LODES/7.4/Source/RAC")
-file_names <- dir(path = ".", pattern = ".csv") #where you have your files
-source_data <- do.call(rbind,lapply(file_names,fread)) #use data.table to batching reading large number of csv files
-source_data <- as.data.frame(source_data)
-gc() #release memory
+file_names <- dir(path = ".", pattern = ".csv")
+s <- lapply(file_names, fread) #append each csv into a list
+
+#and fliter it by h_geocode = "6073"
+new_s = list()
+k = 1
+for (i in s){
+  i$h_geocode <- as.character(i$h_geocode)
+  p = substr(i$h_geocode,1,4) == "6073"
+  i <- i[p,]
+  new_s[[k]] = i
+  k = k + 1
+}
+
+# #drop s and release memory
+# s <- NULL
+# gc()
 
 
-save.image(database_data, "C:/database_data.RData")
-save.image(source_data, "C:/source_data.RData")
+#Flip a list
+fS <- ldply(new_s, data.frame)
+
+fS = as.data.frame(do.call(rbind, new_s))
+
+str(database_data)
+str(fS)
+
+
+# TEST <- as.data.frame(s[1])
+# TEST$h_geocode <- as.character(TEST$h_geocode)
 
 
 
-
-
-# #########Clean Database Data#########
-# # remove unnecessary columns from databased_data
-# database_data$createdate <- NULL
-# database_data$type <- NULL
-# database_data$segment <- NULL
-# database_data$yr <- NULL
+# # Unique Value Check on geoid
+# uniq <- unique(fS$h_geocode)
+# uniq <- sort(uniq, decreasing = FALSE)
+# uniq <- as.character(uniq)
 # 
-# # convert w_geoid of database_data to character type
-# database_data[,1] <- sapply(database_data[,1],as.character)
-# gc() #release memory
+# 
+# uniq_d <- unique(database_data$h_geoid)
+# uniq_d <- sort(uniq_d, decreasing = FALSE)
+# uniq_d <- as.character(uniq_d)
+# 
+# identical(uniq, uniq_d)
+# 
+# min(uniq)
+# min(uniq_d)
+# max(uniq)
+# max(uniq_d)
 
------------------------------------------------------------------------
 
-#Import Source Data
-setwd("R:/DPOE/LEHD LODES/7.4/Source/RAC")
-file_names <- dir(path = ".", pattern = ".csv") #where you have your files
-source_data <- do.call(rbind,lapply(file_names,fread)) #use data.table to batching reading large number of csv files
-source_data <- as.data.frame(source_data)
-# save.image(source_data, "C:/ctpp_source_data.RData")
-gc() #release memory
-  
-  
-  
-  
-=======
-sleep_for_a_minute()
-end_time <- Sys.time()
-
-# connect to database
-channel <- odbcDriverConnect('driver={SQL Server}; server=socioeca8; database=socioec_data_stage; trusted_connection=true')
-sql_query <- 'SELECT * FROM socioec_data_stage.lehd_lodes.rac'
-database_data <- sqlQuery(channel,sql_query,stringsAsFactors = FALSE)
-odbcClose(channel)
-gc() #release memory
-
-#########Clean Database Data#########
-# remove unnecessary columns from database_data
-database_data$createdate <- NULL
+#Remove unnecessary columns from databased_data and source_data
 database_data$type <- NULL
 database_data$segment <- NULL
 database_data$yr <- NULL
+fS$createdate <- NULL
 
-# convert w_geoid of database_data to character type
-database_data[,1] <- sapply(database_data[,1],as.character)
-gc() #release memory
 
------------------------------------------------------------------------
 
-# batching importing and merge csv files into a dataframe
-# four subsets were created by partitioning original 760 csv files based on size
-# smallsize
-setwd("G:/New folder/SourceFiles/SmallSize")
-file_names <- dir("G:/New folder/SourceFiles/SmallSize") #where you have your files
-small_data <- do.call(rbind,lapply(file_names,read.csv))
-a = substr(small_data$w_geocode,1,4) == "6073"
-small_data <- small_data[a,]
-gc() #release memory
 
-# mediumsize
-setwd("G:/New folder/SourceFiles/MediumSize")
-file_names <- dir("G:/New folder/SourceFiles/MediumSize") #where you have your files
-medium_data <- do.call(rbind,lapply(file_names,read.csv))
-a = substr(medium_data$w_geocode,1,4) == "6073"
-medium_data <- medium_data[a,]
-gc() #release memory
 
-# sizeover20MB
-setwd("G:/New folder/SourceFiles/SizeOver20")
-file_names <- dir("G:/New folder/SourceFiles/SizeOver20") #where you have your files
-sizeover20 <- do.call(rbind,lapply(file_names,read.csv))
-a = substr(sizeover20$w_geocode,1,4) == "6073"
-sizeover20 <- sizeover20[a,]
-gc() #release memory
 
-# sizeover30MB
-setwd("G:/New folder/SourceFiles/SizeOver30")
-file_names <- dir("G:/New folder/SourceFiles/SizeOver30") #where you have your files
-sizeover30 <- do.call(rbind,lapply(file_names,read.csv))
-a = substr(sizeover30$w_geocode,1,4) == "6073"
-sizeover30 <- sizeover30[a,]
-gc() #release memory
 
-# merge all partitions
-source_data <- rbind(small_data, medium_data, sizeover20, sizeover30)
-gc() #release memory
->>>>>>> 030e083d0ea5c14b7a5e58a51ded6fd74b414a68
 
-#########Clean Source Data#########
-# remove "createdate" from source_data
+
+
+
+#Initialize source_data as data.table structure based on the first csv file
+#and fliter it by h_geocode = "6073"
+ss <- s[1]
+for (i in ss){
+    p = substr(i$h_geocode,1,4) == "6073"
+    source_data <- subset(i, p)
+}
+
+#Fliter the rest of csv files and combine them into source_data
+tt <- s[2:length(s)]
+for (k in tt){
+  p = substr(i$h_geocode,1,4) == "6073"
+  temp.data <- subset(k, p)
+  source_data<-data.table(rbind(source_data,temp.data))
+}
+
+
+
+a = substr(subset2$w_geocode,1,4) == "6073"
+subset2 <- subset2[a,]
+gc()
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------
+
+#########Clean Data#########
+#Remove unnecessary columns from databased_data and source_data
+database_data$type <- NULL
+database_data$segment <- NULL
+database_data$yr <- NULL
 source_data$createdate <- NULL
 
-# convert source_data$w_geoid to character
-source_data[,1] <- sapply(source_data[,1],as.character)
-
-# rename the header of source_data based on database_data
+#Rename the header of source_data based on database_data
+all.equal(colnames(source_data), colnames(database_data)) #check all the inconsistencies of columnnames
 names(source_data) <- colnames(database_data)
 
-# Sort soruce_data and database_data
+#Convert source_data$w_geoid to character
+source_data$h_geoid <- sapply(source_data$h_geoid,as.numeric)
+
+#
+source_data <- as.data.frame(source_data)
+
+
 database_data <- database_data[
-  with(database_data, order(w_geoid, C000, CA01, CA02, CA03, CE01, CE02, CE03, CNS01, CNS02, CNS03, CNS04, CNS05, CNS06, 
-                          CNS07, CNS08, CNS09, CNS10, CNS11, CNS12, CNS13, CNS14, CNS15, CNS16, CNS17, CNS18, CNS19,
-                          CNS20, CR01, CR02, CR03, CR04, CR05, CR07, CT01, CT02, CD01, CD02, CD03, CD04, CS01, CS02,
-                          CFA01, CFA02, CFA03, CFA04, CFA05, CFS01, CFS02,CFS03, CFS04, CFS05)),
+  with(database_data, order(h_geoid, C000, CA01, CA02, CA03, CE01, CE02, CE03, CNS01, CNS02, CNS03, CNS04, CNS05,
+                            CNS06, CNS07, CNS08, CNS09, CNS10, CNS11, CNS12, CNS13, CNS14, CNS15, CNS16, CNS17,
+                            CNS18, CNS19, CNS20, CR01, CR02, CR03, CR04, CR05, CR07, CT01, CT02, CD01, CD02, CD03,
+                            CD04, CS01, CS02)),
   ]
-gc() #release memory
 
 source_data <- source_data[
-  with(source_data, order(w_geoid, C000, CA01, CA02, CA03, CE01, CE02, CE03, CNS01, CNS02, CNS03, CNS04, CNS05, CNS06,
-                          CNS07, CNS08, CNS09, CNS10, CNS11, CNS12, CNS13, CNS14, CNS15, CNS16, CNS17, CNS18, CNS19,
-                          CNS20, CR01, CR02, CR03, CR04, CR05, CR07, CT01, CT02, CD01, CD02, CD03, CD04, CS01, CS02,
-                          CFA01, CFA02, CFA03, CFA04, CFA05, CFS01, CFS02,CFS03, CFS04, CFS05)),
+  with(source_data, order(h_geoid, C000, CA01, CA02, CA03, CE01, CE02, CE03, CNS01, CNS02, CNS03, CNS04, CNS05,
+                            CNS06, CNS07, CNS08, CNS09, CNS10, CNS11, CNS12, CNS13, CNS14, CNS15, CNS16, CNS17,
+                            CNS18, CNS19, CNS20, CR01, CR02, CR03, CR04, CR05, CR07, CT01, CT02, CD01, CD02, CD03,
+                            CD04, CS01, CS02)),
   ]
 gc() #release memory
 
-# remove rownames (This works, but looking for other solutions to fix inconconsistency of rownames types)
+#Remove rownames (This works, but looking for other solutions to fix inconconsistency of rownames types)
 rownames(source_data) <-NULL
 rownames(database_data) <-NULL
 
-# load("G:/New folder/source_data_paritions3.RData")
+#
+all.equal(source_data[2:ncol(source_data)], database_data[2:ncol(database_data)])
+
+source_data[,1]
+# #
+# all.equal(unique(source_data$h_geoid),unique(database_data$h_geoid))
+# 
+# sss <- unique(source_data$h_geoid)
+# ddd <- unique(database_data$h_geoid)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -----------------------------------------------------------------------
 
@@ -178,11 +219,6 @@ rownames(database_data) <-NULL
 str(source_data)
 str(database_data)
 
-# mode(attr(source_data, "row.names")) #chr
-# storage.mode(attr(source_data, "row.names")) #chr
-# mode(attr(database_data, "row.names")) #num
-# storage.mode(attr(database_data, "row.names")) #int
-
 
 # compare files 
 all(source_data == database_data) #chekc cell values only
@@ -190,6 +226,8 @@ all.equal(source_data, database_data) #chekc cell values and data types and will
 identical(source_data, database_data) #chekc cell values and data types
 
 # display running time of R code
+sleep_for_a_minute()
+end_time <- Sys.time()
 end_time - start_time
 
 # # TEST Code for small subset
