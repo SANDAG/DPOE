@@ -52,12 +52,12 @@ source_data2$start_date <- as.Date((source_data2$start_date), format = "%Y-%m-%d
 database_data2$start_date <- as.Date((database_data2$start_date), format = "%Y-%m-%d")
 
 #Check data types
-# sapply(source_data, class)
-# sapply(database_data, class)
-# sapply(source_data1, class)
-# sapply(database_data1, class)
-# sapply(source_data2, class)
-# sapply(database_data2, class)
+sapply(source_data, class)
+sapply(database_data, class)
+sapply(source_data1, class)
+sapply(database_data1, class)
+sapply(source_data2, class)
+sapply(database_data2, class)
 
 #trim whitespace from product column values
 source_data1$product <- trimws(source_data1$product)
@@ -96,7 +96,7 @@ source_data <- data.frame(source_data)
 source_data1 <- data.frame(source_data1)
 source_data2 <- data.frame(source_data2)
 
-# compare source and to raw database files to ensure they match
+#compare source and to raw database files to ensure they match
 all(source_data == database_data)
 identical(source_data,database_data)
 which(source_data!=database_data, arr.ind=TRUE)
