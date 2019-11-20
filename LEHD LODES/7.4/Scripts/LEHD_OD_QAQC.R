@@ -1,20 +1,19 @@
-# set up workspace
+#Set up workspace
 maindir = dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(maindir)
 
-# import functions
-
+#Import functions
 install.packages("here")
 library(here)
 source(here("Common_functions","readSQL.R"))
 source(here("Common_functions","common_functions.R"))
 source(here("Common_functions","config.R"))
 
-# import packages
+#Import packages
 packages <- c("RODBC","tidyverse","openxlsx","hash","plyr","devtools", "data.table")
 pkgTest(packages)
 
-# initialize start time
+#Initialize start time
 sleep_for_a_minute <- function() { Sys.sleep(60) }
 start_time <- Sys.time()
 
@@ -55,7 +54,6 @@ str(database_data)
 str(source_data)
 
 #-------------------------------------------------------------------#
-  
 #########Clean Data#########
 #Remove unnecessary columns from databased_data and source_data
 database_data$type <- NULL
@@ -68,7 +66,7 @@ all.equal(colnames(source_data), colnames(database_data)) #check all the inconsi
 names(source_data) <- colnames(database_data)
 all.equal(colnames(source_data), colnames(database_data)) # should return TRUE
 
-#Convert source_data$w_geoid to character
+#Convert source_data$w_geoid and $h_geoid to character
 source_data$w_geoid <- sapply(source_data$w_geoid,as.numeric)
 source_data$h_geoid <- sapply(source_data$h_geoid,as.numeric)
 gc() #release memory
