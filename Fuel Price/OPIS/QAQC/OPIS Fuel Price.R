@@ -23,6 +23,7 @@ sql_query2 <- 'SELECT * FROM [dpoe_stage].[dbo].[opis_fuel_price_0118_0519]'
 database_data2 <- sqlQuery(channel,sql_query2,stringsAsFactors = FALSE)
 
 odbcClose(channel)
+
 #Read in excel data
 #Dataset #1 - January 2005 to December 2013 OPIS Fuel Price Data
 source_data <- read_excel("R:\\DPOE\\Fuel Price\\OPIS\\2019\\Source\\OPIS_FUEL_010105to123113.xlsx")
@@ -41,6 +42,14 @@ source_data <- plyr::rename(source_data, c("Region Name"="region", "Product"="pr
 source_data1 <- plyr::rename(source_data1, c("Region Name"="region", "RP Name"="product", "Start Date"="start_date", "Retail Average"="retail_avg", "Wholesale Average"="wholesale_avg", "Tax Average"="tax_avg", "Freight Average"="freight_avg", "Margin Average"="margin_avg", "Net Average"="net_avg"))
 source_data2 <- plyr::rename(source_data2, c("Region Name"="region", "Product"="product", "Start Date"="start_date", "Retail Average"="retail_avg", "Wholesale Average"="wholesale_avg","Tax Average"="tax_avg", "Freight Average"="freight_avg", "Margin Average"="margin_avg", "Net Average"="net_avg"))
 
+#Check data types
+# sapply(source_data, class)
+# sapply(database_data, class)
+# sapply(source_data1, class)
+# sapply(database_data1, class)
+# sapply(source_data2, class)
+# sapply(database_data2, class)
+
 #Convert field Start Date to a Date field
 source_data$start_date <- as.Date((source_data$start_date), format = "%Y-%m-%d")
 database_data$start_date <- as.Date((database_data$start_date), format = "%Y-%m-%d")
@@ -51,13 +60,10 @@ database_data1$start_date <- as.Date((database_data1$start_date), format = "%Y-%
 source_data2$start_date <- as.Date((source_data2$start_date), format = "%Y-%m-%d")
 database_data2$start_date <- as.Date((database_data2$start_date), format = "%Y-%m-%d")
 
-#Check data types
-sapply(source_data, class)
-sapply(database_data, class)
-sapply(source_data1, class)
-sapply(database_data1, class)
-sapply(source_data2, class)
-sapply(database_data2, class)
+#Convert source files to a data frame
+source_data <- data.frame(source_data)
+source_data1 <- data.frame(source_data1)
+source_data2 <- data.frame(source_data2)
 
 #trim whitespace from product column values
 source_data1$product <- trimws(source_data1$product)
@@ -91,11 +97,6 @@ rownames(database_data1) <- NULL
 rownames(source_data2) <- NULL
 rownames(database_data2) <- NULL
 
-#make source data files data.frame class 
-source_data <- data.frame(source_data)
-source_data1 <- data.frame(source_data1)
-source_data2 <- data.frame(source_data2)
-
 #compare source and to raw database files to ensure they match
 all(source_data == database_data)
 identical(source_data,database_data)
@@ -108,6 +109,8 @@ which(source_data1!=database_data1, arr.ind = TRUE)
 all(source_data2 == database_data2)
 identical(source_data2,database_data2)
 which(source_data2!=database_data2, arr.ind = TRUE)
+
+rm(database_data, database_data1,database_data2)
 
 ######################################################################################################################################################
 #File comparison between source file to fact table
@@ -137,7 +140,6 @@ source_data$region[source_data$region == "County - CA, San Diego"] <- "San Diego
 source_data1$region[source_data1$region == "County - CA, San Diego"] <- "San Diego County"
 source_data2$region[source_data2$region == "County - CA, San Diego"] <- "San Diego County"
 
-#Replace product types in source data to match db data
 
 #Find unique column values
 # unique(db_2005$product)
@@ -147,8 +149,10 @@ source_data2$region[source_data2$region == "County - CA, San Diego"] <- "San Die
 # unique(db_2018$product)
 # unique(source_data2$product)
 
+#Replace product types in source data to match db data
 #Unleaded
 source_data$product[source_data$product == "UNL"] <- "Unleaded Gas"
+source_data1$product[source_data1$product == "Reg"] <- "Unleaded Gas"
 
 #Diesel
 source_data$product[source_data$product == "DSL"] <- "Diesel"
@@ -161,8 +165,6 @@ source_data1$product[source_data1$product == "Mid"] <- "Midgrade Gas"
 source_data$product[source_data$product == "PRE"] <- "Premium Gas"
 source_data1$product[source_data1$product == "Pre"] <- "Premium Gas"
 
-#Regular
-source_data1$product[source_data1$product == "Reg"] <- "Regular Gas"
 
 #Check data types
 # sapply(source_data, class)
@@ -177,6 +179,11 @@ db_2005$station_count <- as.numeric(db_2005$station_count)
 db_2005$start_date <- as.Date((db_2005$start_date), format = "%Y-%m-%d")
 db_2014$start_date <- as.Date((db_2014$start_date), format = "%Y-%m-%d")
 db_2018$start_date <- as.Date((db_2018$start_date), format = "%Y-%m-%d")
+
+#Convert to data frame
+db_2005 <- data.frame(db_2005)
+db_2014 <- data.frame(db_2014)
+db_2018 <- data.frame(db_2018)
 
 #Order data frames for comparison
 source_data <- source_data[order(source_data$region, source_data$product, source_data$start_date, source_data$station_count, source_data$retail_avg),]
@@ -193,12 +200,7 @@ rownames(db_2005) <- NULL
 rownames(db_2014) <- NULL
 rownames(db_2018) <- NULL
 
-#make source data files data.frame class 
-db_2005 <- data.frame(db_2005)
-db_2014 <- data.frame(db_2014)
-db_2018 <- data.frame(db_2018)
-
-# compare source to fact table (broken out from 2005-2013, 2014-2017, and 2018-2019) to ensure they match
+#compare source to fact table (broken out from 2005-2013, 2014-2017, and 2018-2019) to ensure they match
 all(source_data == db_2005)
 identical(source_data,db_2005)
 which(source_data!=db_2005, arr.ind=TRUE)
