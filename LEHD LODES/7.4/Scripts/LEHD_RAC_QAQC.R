@@ -41,7 +41,7 @@ for (i in dat_csv){
 }
 gc()
 
-#drop dat_csv and release memory
+#Drop dat_csv and release memory
 dat_csv <- NULL
 i <- NULL
 gc()
@@ -98,12 +98,12 @@ rownames(database_data) <-NULL
 str(database_data)
 str(source_data)
 
-# compare files 
+#Compare files 
 all(source_data == database_data) #chekc cell values only
 all.equal(source_data, database_data) #chekc cell values and data types and will return the conflicted cells
 identical(source_data, database_data) #chekc cell values and data types
 which(source_data!=database_data, arr.ind = TRUE) #which command shows exactly which columns are incorrect
 
-# display running time of R code
+#Display running time of R code
 end_time <- Sys.time()
 end_time - start_time
