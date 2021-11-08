@@ -211,6 +211,58 @@ str = paste("EXEC sys.sp_addextendedproperty @name=N'table_description' ,
 dbExecute(con,sqlInterpolate(con,str))
 
 
+# ----------------------------------------------------------------------
+# Add page level compression
+# ----------------------------------------------------------------------
+str = paste("ALTER TABLE ",schema,".",dbtable,
+            " REBUILD WITH (DATA_COMPRESSION = PAGE); ",sep = "")
+dbExecute(con,sqlInterpolate(con,str))
+
+
+# ----------------------------------------------------------------------
+# change datatype and make not null for GEOID
+# so it can be used as an index in the view
+# note this has to be before creating non-clustered index on COUNTY since
+# it includes GEOID column.
+# ----------------------------------------------------------------------
+# determine length first
+# SELECT MAX(LEN(GEOID)) FROM [decennial].[pl_94_171_2020_ca]
+str = paste("ALTER TABLE ",schema,".",dbtable,
+            " ALTER COLUMN GEOID varchar(50) NOT NULL;",sep = "")
+dbExecute(con,sqlInterpolate(con,str))
+
+
+# ----------------------------------------------------------------------
+# add LOGRECNO as primary key
+# change LOGRECNO to NOT NULL first
+# ----------------------------------------------------------------------
+str = paste("ALTER TABLE ",schema,".",dbtable,
+            " ALTER COLUMN LOGRECNO int NOT NULL;",sep = "")
+dbExecute(con,sqlInterpolate(con,str))
+str = paste("ALTER TABLE ",schema,".",dbtable,
+            " ADD CONSTRAINT PK_LOGRECNO PRIMARY KEY (LOGRECNO);",sep = "")
+dbExecute(con,sqlInterpolate(con,str))
+
+# ----------------------------------------------------------------------
+# add COUNTY as non-clustered index
+# include all non-indexed columns
+# ----------------------------------------------------------------------
+idx_name = "[idx_COUNTY]"
+include_columns = c(colnames(header), 
+                    paste0("P00", c(10001:10071)),paste0("P00", c(20001:20073)),
+                    paste0("P00", c(30001:30071)),paste0("P00", c(40001:40073)),
+                    paste0("P00", c(50001:50010)),paste0("H00", c(10001:10003)))
+# remove indexed column LOGRECNO and the non-clustered index COUNTY
+# include_columns <-include_columns[!include_columns %in% c("LOGRECNO","COUNTY")]
+# include LOGRECNO to see if that makes a difference
+include_columns <-include_columns[!include_columns %in% c("COUNTY")]
+str = paste("CREATE NONCLUSTERED INDEX ",idx_name," ON [",schema,"].",dbtable,
+            " ([COUNTY] ASC)"," INCLUDE ( ",paste(include_columns,collapse = ", "),")",sep = "")
+# try not including all the columns to see if that impacts performance.
+# str = paste("CREATE NONCLUSTERED INDEX ",idx_name," ON [",schema,"].",dbtable,
+#            " ([COUNTY] ASC)" ,sep = "")
+dbExecute(con,sqlInterpolate(con,str))
+
 
 # -------------------------------------------------------------
 # List of columns for each View: P1, P2, P3, P4, P5, H1
@@ -223,21 +275,34 @@ P5cols = c(colnames(header), paste0("P00", c(50001:50010)))
 H1cols = c(colnames(header), paste0("H00", c(10001:10003)))
 view_columns <- list(P1cols,P2cols,P3cols,P4cols,P5cols,H1cols)
 
-# -----------------------------
+# -------------------------------------
 # Create views: P1, P2, P3, P4, P5, H1
-# -----------------------------
-for(i in 1:length(view_tables)) {  
-  str = paste("CREATE VIEW [",schema,"].",view_tables[[i]]," as SELECT ",
-              paste(view_columns[[i]],collapse = ", "), 
+# with clustered index on GEOID
+# and non clustered index on NAME and BASENAME
+# -------------------------------------
+
+
+for(i in 1:length(view_tables)) {
+  str = paste("CREATE VIEW [",schema,"].",view_tables[[i]]," WITH SCHEMABINDING AS SELECT ",
+              paste(view_columns[[i]],collapse = ", "),
               " FROM ",schema,".",dbtable," WHERE COUNTY = '073'",
                sep = "")
   dbExecute(con,sqlInterpolate(con,str))
+  idx_name = paste('idx_',substr(view_tables[[i]], 19, 20),'_GEOID',sep='')
+  str = paste("CREATE UNIQUE CLUSTERED INDEX ",idx_name," ON [",schema,"].",view_tables[[i]],
+              " (GEOID)",sep = "")
+  dbExecute(con,sqlInterpolate(con,str))
+  idx_name = paste('idx_',substr(view_tables[[i]], 19, 20),'_NAME',sep='')
+  str = paste("CREATE NONCLUSTERED INDEX ",idx_name," ON [",schema,"].",view_tables[[i]],
+              " ([NAME],[BASENAME])",sep = "")
+  dbExecute(con,sqlInterpolate(con,str))
 }
+
 
 # -------------------------------------------------------
 # Add extended properties for views table info
 # -------------------------------------------------------
-for(i in 1:length(view_tables)) {  
+for(i in 1:length(view_tables)) {
   # add table name to extended properties
   str = paste("EXEC sys.sp_addextendedproperty @name=N'","view_description","' ,
               @value=N'",tables_df$Universe[[i]],": ",tables_df$TableName[[i]],"' ,
@@ -249,13 +314,13 @@ for(i in 1:length(view_tables)) {
 # -------------------------------------------------------
 # Add extended properties for view column descriptions
 # -------------------------------------------------------
-for(j in 1:length(view_tables)) {  
-  fields = census_fields[census_fields$field_id %in% c(view_columns[[j]]), ] 
-  for(i in 1:nrow(fields)) 
+for(j in 1:length(view_tables)) {
+  fields = census_fields[census_fields$field_id %in% c(view_columns[[j]]), ]
+  for(i in 1:nrow(fields))
   {
     colname = paste("N'",fields[i,1],"'",sep='')
     value = paste("N'",fields[i,2],"'",sep='')
-    str = paste("EXEC sys.sp_addextendedproperty @name=N'column_description', 
+    str = paste("EXEC sys.sp_addextendedproperty @name=N'column_description',
               @value=",value,",@level0type=N'SCHEMA',@level0name=N'",schema,"',
               @level1type=N'VIEW',@level1name=N'",view_tables[[j]],"',@level2type=N'COLUMN',
               @level2name=", colname, sep = "")
@@ -270,23 +335,16 @@ for(j in 1:length(view_tables)) {
 sumlevs = pl_geog_levels
 dbWriteTable(con, Id(schema = schema, table = "ref_sumlev"), sumlevs)
 
+# ----------------------------------------------------------------------
+# add SUMLEV as primary key
+# change SUMLEV to NOT NULL first
+# ----------------------------------------------------------------------
 
-# ----------------------------------------------------------------------
-# Add page level compression
-# ----------------------------------------------------------------------
-str = paste("ALTER TABLE ",schema,".",dbtable,
-            " REBUILD WITH (DATA_COMPRESSION = PAGE); ",sep = "")
+str = paste("ALTER TABLE ",schema,".","ref_sumlev",
+            " ALTER COLUMN SUMLEV varchar(20) NOT NULL;",sep = "")
 dbExecute(con,sqlInterpolate(con,str))
-
-# ----------------------------------------------------------------------
-# add LOGRECNO as primary key
-# change LOGRECNO to NOT NULL first
-# ----------------------------------------------------------------------
-str = paste("ALTER TABLE ",schema,".",dbtable,
-            " ALTER COLUMN LOGRECNO int NOT NULL;",sep = "")
-dbExecute(con,sqlInterpolate(con,str))
-str = paste("ALTER TABLE ",schema,".",dbtable,
-            " ADD CONSTRAINT PK_LOGRECNO PRIMARY KEY (LOGRECNO);",sep = "")
+str = paste("ALTER TABLE ",schema,".","ref_sumlev",
+            " ADD CONSTRAINT PK_SUMLEV PRIMARY KEY (SUMLEV);",sep = "")
 dbExecute(con,sqlInterpolate(con,str))
 
 
