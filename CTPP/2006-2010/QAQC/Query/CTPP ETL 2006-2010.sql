@@ -1,1 +1,0 @@
-SELECT * FROM fact.ctpp_2010
